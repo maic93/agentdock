@@ -1,7 +1,39 @@
-node_modules
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Nx
+.nx/cache/
+.nx/workspace-data/
+
+# Testing
+coverage/
+
+# Environment
 .env
 .env.local
-dist
-.next
-.vscode
+.env.*.local
+!.env.example
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+
+# Logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Changesets pre-release state (generated, not hand-authored)
+.changeset/pre.json
+
+# Docker
+docker-compose.override.yml

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Ask a question / start a discussion
+    url: https://github.com/agentdock/agentdock/discussions
+    about: For open-ended questions or proposals, use Discussions rather than an issue.
+  - name: Report a security vulnerability
+    url: https://github.com/agentdock/agentdock/security/advisories/new
+    about: Please do not report vulnerabilities via public issues — see SECURITY.md.

@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose a new feature or enhancement.
+title: "feat: <short description>"
+labels: ["type:feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For anything touching a **public package API**, a **new package**, or
+        a **dependency-boundary rule**, please open an RFC instead
+        (see `docs/rfcs/0000-template.md`) rather than a feature request —
+        those changes need structured design discussion before implementation.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the problem from the user's or contributor's perspective, not the solution yet.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: input
+    id: area
+    attributes:
+      label: Affected area
+      description: e.g. packages/kernel/workflow-engine, docs/plugin-guide

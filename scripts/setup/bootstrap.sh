@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# One-command local environment bootstrap, referenced from README.md and
+# CONTRIBUTING.md. Cross-platform note: this script targets bash (available
+# via WSL2/Git Bash on Windows, native on macOS/Linux) per the project's
+# cross-platform requirement — see docs/architecture, Section 4 (Primary
+# Goals: Windows/Linux/macOS all supported).
+set -euo pipefail
+
+echo "==> Checking Node.js version against .nvmrc"
+required_node="$(cat .nvmrc)"
+if ! command -v node >/dev/null 2>&1; then
+  echo "Node.js is not installed. Install Node.js ${required_node} first (see https://nodejs.org or use nvm/fnm)." >&2
+  exit 1
+fi
+
+echo "==> Enabling Corepack (for pinned pnpm version)"
+corepack enable
+
+echo "==> Installing dependencies"
+pnpm install
+
+echo "==> Copying .env.example to .env (skipped if .env already exists)"
+if [ ! -f .env ]; then
+  cp .env.example .env
+  echo "Created .env — review it before running anything that reads it."
+else
+  echo ".env already exists, leaving it untouched."
+fi
+
+echo "==> Setting up git hooks"
+pnpm exec husky
+
+echo "==> Done. Run 'pnpm nx graph' to explore the workspace, or see CONTRIBUTING.md for next steps."

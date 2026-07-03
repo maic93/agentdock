@@ -1,0 +1,27 @@
+{
+  "name": "AgentDock",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "nrwl.angular-console",
+        "editorconfig.editorconfig",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+  "postCreateCommand": "corepack enable && corepack prepare pnpm@9.7.0 --activate && pnpm install",
+  "remoteUser": "node",
+  "mounts": [
+    "source=agentdock-pnpm-store,target=/home/node/.local/share/pnpm/store,type=volume"
+  ]
+}

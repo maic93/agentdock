@@ -1,0 +1,47 @@
+# CODEOWNERS
+#
+# This file maps repository areas to the maintainers required to review
+# changes there, per the governance model in
+# docs/architecture (Repository Foundation, Section 11).
+#
+# Placeholder GitHub handles below (@agentdock/*-maintainers) are team
+# handles to be created and populated as real maintainers join — see
+# docs/contributing/governance.md for how someone becomes an area maintainer.
+# This file itself is a governance artifact: changes to it require core-team
+# sign-off, the same as an RFC affecting governance.
+
+# Default: core team reviews anything not covered by a more specific rule.
+*                                   @agentdock/core-team
+
+# Kernel — orchestration core
+/packages/kernel/                  @agentdock/kernel-maintainers
+
+# Foundation — infrastructure services
+/packages/foundation/              @agentdock/foundation-maintainers
+
+# Provider abstraction — the most widely depended-upon internal contract
+/packages/providers/               @agentdock/core-team
+
+# Shared contracts and the plugin SDK — held to the strictest compatibility bar
+/packages/shared/                  @agentdock/core-team
+
+# First-party reference plugins
+/plugins/                          @agentdock/plugin-ecosystem-maintainers
+
+# Applications
+/apps/web/                         @agentdock/web-maintainers
+/apps/api/                         @agentdock/api-maintainers
+/apps/cli/                         @agentdock/api-maintainers
+
+# Repository tooling and dependency-boundary configuration
+/tooling/                          @agentdock/core-team
+/eslint.config.mjs                 @agentdock/core-team
+/nx.json                           @agentdock/core-team
+/tsconfig.base.json                @agentdock/core-team
+/pnpm-workspace.yaml               @agentdock/core-team
+
+# Governance and process documents
+/docs/adr/                         @agentdock/core-team
+/docs/rfcs/                        @agentdock/core-team
+/CODEOWNERS                        @agentdock/core-team
+/SECURITY.md                       @agentdock/core-team

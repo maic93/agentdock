@@ -1,0 +1,23 @@
+# Workspace package globs, mirroring the repository blueprint approved in
+# docs/architecture/002-repository-foundation.md.
+#
+# Each glob maps 1:1 to a layer in the dependency-boundary model:
+#   apps/*                -> deployable interfaces (leaves in the dep graph)
+#   packages/kernel/*      -> orchestration core
+#   packages/foundation/*  -> infrastructure services consumed by the kernel
+#   packages/providers/*   -> the provider abstraction contract (no concrete providers)
+#   packages/shared/*      -> cross-cutting, dependency-free contracts and utilities
+#   plugins/*              -> first-party REFERENCE plugins only (see plugins/README.md)
+#   tooling/*              -> shared build/lint/tsconfig tooling, not runtime code
+#
+# Deliberately NOT included: examples/, templates/ — these are copy-from
+# starting points for contributors, not workspace packages the build graph
+# should manage.
+packages:
+  - "apps/*"
+  - "packages/kernel/*"
+  - "packages/foundation/*"
+  - "packages/providers/*"
+  - "packages/shared/*"
+  - "plugins/*"
+  - "tooling/*"

@@ -1,0 +1,51 @@
+# Dependabot, not Renovate — see docs/architecture (or the note below) for
+# why. Kept deliberately simple: weekly batched PRs, grouped by ecosystem, to
+# avoid drowning maintainers in individual bump PRs at scale.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    groups:
+      typescript-tooling:
+        patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
+          - "eslint*"
+          - "prettier"
+      nx:
+        patterns:
+          - "nx"
+          - "@nx/*"
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "ci"
+
+  - package-ecosystem: "docker"
+    directory: "/infra/docker"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+    labels:
+      - "dependencies"
+      - "infra"
