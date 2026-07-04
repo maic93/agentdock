@@ -12,6 +12,13 @@ concurrency:
 
 env:
   NX_CLOUD_DISTRIBUTED_EXECUTION: false
+  # Works around a real failure discovered while stabilizing this workflow:
+  # Nx's daemon creates a Unix domain socket whose path is derived from the
+  # workspace path, and long checkout paths (common on hosted CI runners,
+  # and structurally common on Windows) can exceed the OS socket-path
+  # length limit. Pointing it at a short, fixed tmp path avoids that class
+  # of failure entirely rather than papering over a symptom.
+  NX_SOCKET_DIR: /tmp/nx-agentdock
 
 jobs:
   verify:

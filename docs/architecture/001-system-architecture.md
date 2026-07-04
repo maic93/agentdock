@@ -27,6 +27,7 @@ This is a request-driven, plugin-extensible orchestration platform, not a chatbo
 In three to five years, AgentDock should be to AI agents what Kubernetes became to container orchestration, or what an operating system kernel is to application software: an unglamorous, trusted, extensible substrate that most users never think about directly, but that a large ecosystem of plugins, providers, and downstream products is built on.
 
 Success looks like:
+
 - A self-hostable core that runs on a laptop or a homelab with zero cloud dependency.
 - A plugin ecosystem where adding a new model provider, tool, or workflow template is a well-documented, low-friction contribution.
 - A routing layer trusted enough that power users leave it in "automatic" mode rather than pinning models manually.
@@ -36,6 +37,7 @@ Success looks like:
 ## 4. Scope
 
 **In scope (v1 architecture target):**
+
 - Goal intake, intent classification, task decomposition, planning.
 - Multi-model routing across local and remote providers.
 - Tool/plugin execution framework with sandboxing.
@@ -46,6 +48,7 @@ Success looks like:
 - Self-hosted deployment via containers, on Linux/macOS/Windows.
 
 **Explicitly out of scope for v1:**
+
 - Training or fine-tuning models.
 - Being a general-purpose consumer chat app (chat is one interface, not the product).
 - Multi-tenant SaaS billing/metering infrastructure (may come later as an optional hosted layer, architecturally decoupled from core).
@@ -148,31 +151,31 @@ Key architectural decision: **the kernel never imports a specific provider or to
 
 ## 11. Core Modules
 
-| Module | Purpose |
-|---|---|
-| Web UI | Human-facing goal intake, plan visualization, artifact review |
-| API | Programmatic goal intake, same capabilities as UI, auth-gated |
-| Agent Runtime | Executes individual task steps, manages tool-call loops |
-| Task Planner | Converts a goal into a task graph (DAG) with dependencies |
-| Workflow Engine | Executes the task graph, handles retries/branching/parallelism |
-| AI Router | Chooses the best model per task given constraints |
-| Prompt Builder | Assembles context-aware prompts per model/task type |
-| Model Registry | Catalog of available models with capability metadata |
+| Module               | Purpose                                                                    |
+| -------------------- | -------------------------------------------------------------------------- |
+| Web UI               | Human-facing goal intake, plan visualization, artifact review              |
+| API                  | Programmatic goal intake, same capabilities as UI, auth-gated              |
+| Agent Runtime        | Executes individual task steps, manages tool-call loops                    |
+| Task Planner         | Converts a goal into a task graph (DAG) with dependencies                  |
+| Workflow Engine      | Executes the task graph, handles retries/branching/parallelism             |
+| AI Router            | Chooses the best model per task given constraints                          |
+| Prompt Builder       | Assembles context-aware prompts per model/task type                        |
+| Model Registry       | Catalog of available models with capability metadata                       |
 | Provider Abstraction | Uniform interface over Ollama, OpenAI, Anthropic, Google, OpenRouter, etc. |
-| Tool Registry | Catalog of available tools/plugins with capability metadata |
-| Memory | Short/long-term contextual memory per user/project |
-| Knowledge Base | Durable, queryable domain knowledge (RAG-style) |
-| Search | Web/document search abstraction, provider-agnostic |
-| File Manager | Reads/writes files within sandboxed workspaces |
-| Artifact Manager | Versioned storage/retrieval of task outputs |
-| Scheduler | Cron-like and event-triggered recurring job execution |
-| Authentication | Identity, sessions, RBAC |
-| Plugin System | Discovery, sandboxing, lifecycle of third-party extensions |
-| Event Bus | Async pub/sub backbone connecting all modules |
-| Logging | Structured, queryable execution logs |
-| Monitoring | Metrics, health checks, cost/usage tracking |
-| Configuration | Layered config (defaults → file → env → runtime override) |
-| Database Layer | Persistence abstraction (plans, artifacts, memory metadata) |
+| Tool Registry        | Catalog of available tools/plugins with capability metadata                |
+| Memory               | Short/long-term contextual memory per user/project                         |
+| Knowledge Base       | Durable, queryable domain knowledge (RAG-style)                            |
+| Search               | Web/document search abstraction, provider-agnostic                         |
+| File Manager         | Reads/writes files within sandboxed workspaces                             |
+| Artifact Manager     | Versioned storage/retrieval of task outputs                                |
+| Scheduler            | Cron-like and event-triggered recurring job execution                      |
+| Authentication       | Identity, sessions, RBAC                                                   |
+| Plugin System        | Discovery, sandboxing, lifecycle of third-party extensions                 |
+| Event Bus            | Async pub/sub backbone connecting all modules                              |
+| Logging              | Structured, queryable execution logs                                       |
+| Monitoring           | Metrics, health checks, cost/usage tracking                                |
+| Configuration        | Layered config (defaults → file → env → runtime override)                  |
+| Database Layer       | Persistence abstraction (plans, artifacts, memory metadata)                |
 
 ---
 
@@ -180,7 +183,7 @@ Key architectural decision: **the kernel never imports a specific provider or to
 
 **Task Planner** — Owns intent classification and decomposition only. It does not execute anything; it emits a task graph (nodes = tasks with required capabilities, edges = dependencies) to the Workflow Engine. Should be swappable (e.g., a simpler heuristic planner vs. an LLM-driven planner) behind one interface.
 
-**Workflow Engine** — Owns execution order, parallelism, retries, and state persistence of the task graph. It is a state machine, not a planner — it never decides *what* to do, only *when and how* to run what the Planner produced.
+**Workflow Engine** — Owns execution order, parallelism, retries, and state persistence of the task graph. It is a state machine, not a planner — it never decides _what_ to do, only _when and how_ to run what the Planner produced.
 
 **AI Router** — Given a task's declared capability requirement (e.g., "code generation," "image generation," "fast reasoning"), and constraints (cost ceiling, latency budget, local-only flag, privacy tier), selects a specific model from the Model Registry. Falls back automatically on provider failure.
 
@@ -294,6 +297,7 @@ These are recommendations for the design phase, not commitments — they should 
 **Recommendation: Monorepo for core, polyrepo for the plugin ecosystem.**
 
 Reasoning:
+
 - The Orchestration Kernel's modules (Planner, Workflow Engine, Router, Registries, Event Bus) are tightly interdependent during this early design phase where interfaces are still being discovered — a monorepo lets those interfaces evolve together with atomic commits, which is much harder across repo boundaries.
 - Plugins (providers, tools, connectors) are, by design, meant to be independently developed and versioned by third parties — forcing them into the core monorepo would contradict the "plugins without core changes" goal. These belong in their own repos (community-owned or under an `agentdock-plugins` org), discovered via a registry/manifest system rather than repo co-location.
 - A monorepo for core also simplifies CI, versioning, and cross-module refactors during the pre-1.0 phase when internal interfaces are still shifting; splitting too early tends to fossilize interfaces before they're proven.
@@ -302,7 +306,7 @@ Reasoning:
 
 ## 22. Suggested Repository Structure
 
-*(Structure only — no actual files/configs are being generated per the design-only constraint.)*
+_(Structure only — no actual files/configs are being generated per the design-only constraint.)_
 
 ```
 agentdock/
@@ -346,16 +350,16 @@ Third-party plugins live outside this repo entirely, published to a package regi
 
 ## 23. Risks and Trade-Offs
 
-| Risk | Trade-off / Mitigation |
-|---|---|
-| Over-engineering the kernel before any real usage validates the abstractions | Build a thin vertical slice (one goal type, one provider, one tool) end-to-end before generalizing further |
-| Routing complexity balloons (too many constraints/heuristics) | Start with a simple rule-based router; defer learned/adaptive routing to a later version |
-| Plugin sandboxing adds significant engineering cost early | Ship a coarse-grained sandbox (container-per-tool-call) first; refine isolation granularity later |
-| "Automatic everything" frustrates power users who want control | Every automatic decision must have an explicit, discoverable override — this is a hard requirement, not a nice-to-have |
-| Local-first commitment limits quality on constrained hardware | Make the quality/local trade-off a visible, configurable dial rather than a hidden default |
-| Monorepo for core could slow contributor onboarding if tooling is heavy | Invest early in fast, well-documented local dev setup (this is often the actual onboarding blocker, not repo shape) |
-| Event Bus becomes a hidden coupling point if event schemas aren't versioned | Treat event schemas as a public contract with the same rigor as API endpoints |
-| Cost of supporting "any provider" indefinitely | Define a minimal Provider Abstraction interface early and resist provider-specific leakage into the kernel |
+| Risk                                                                         | Trade-off / Mitigation                                                                                                 |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Over-engineering the kernel before any real usage validates the abstractions | Build a thin vertical slice (one goal type, one provider, one tool) end-to-end before generalizing further             |
+| Routing complexity balloons (too many constraints/heuristics)                | Start with a simple rule-based router; defer learned/adaptive routing to a later version                               |
+| Plugin sandboxing adds significant engineering cost early                    | Ship a coarse-grained sandbox (container-per-tool-call) first; refine isolation granularity later                      |
+| "Automatic everything" frustrates power users who want control               | Every automatic decision must have an explicit, discoverable override — this is a hard requirement, not a nice-to-have |
+| Local-first commitment limits quality on constrained hardware                | Make the quality/local trade-off a visible, configurable dial rather than a hidden default                             |
+| Monorepo for core could slow contributor onboarding if tooling is heavy      | Invest early in fast, well-documented local dev setup (this is often the actual onboarding blocker, not repo shape)    |
+| Event Bus becomes a hidden coupling point if event schemas aren't versioned  | Treat event schemas as a public contract with the same rigor as API endpoints                                          |
+| Cost of supporting "any provider" indefinitely                               | Define a minimal Provider Abstraction interface early and resist provider-specific leakage into the kernel             |
 
 ---
 
@@ -386,13 +390,15 @@ Third-party plugins live outside this repo entirely, published to a package regi
 ## Self-Critique
 
 **Strengths of this design:**
+
 - The kernel/capability/foundation layering and the "core never imports a specific provider" rule are the load-bearing decisions — they're what actually make "local-first, provider-agnostic, plugin-based" enforceable rather than marketing language.
 - Separating control-plane, content-plane, and context-plane data early avoids a common failure mode in agent frameworks where everything ends up crammed into one relational schema and becomes unmaintainable as artifact/context volume grows.
 - Treating plans as DAGs rather than linear scripts from day one avoids a costly rewrite later, since parallelism and re-planning are hard to retrofit onto a linear execution model.
 
 **Weaknesses and honest trade-offs:**
-- This design is **ambitious relative to a genuinely empty repository**. The gap between "AI Operating System with 22 modules" and a first working vertical slice is large; the biggest execution risk isn't the architecture, it's the discipline to *not* build all 22 modules before validating the core loop with one provider and one tool.
+
+- This design is **ambitious relative to a genuinely empty repository**. The gap between "AI Operating System with 22 modules" and a first working vertical slice is large; the biggest execution risk isn't the architecture, it's the discipline to _not_ build all 22 modules before validating the core loop with one provider and one tool.
 - The routing philosophy (capability-first, cost/latency-aware, local-preferred) is well-reasoned but genuinely hard to implement well — real-world routing quality depends on capability metadata that's tedious to keep accurate as models change weekly. This will likely need more iteration than any other subsystem, and the document may be understating that cost.
-- The plugin sandboxing/security model is described at the philosophy level but sandboxing arbitrary third-party tool code safely and *conveniently* (without making every plugin author fight the sandbox) is a genuinely hard, unsolved-in-general problem — this deserves its own dedicated design pass, likely informed by prior art (e.g., how VS Code, Obsidian, or browser extension platforms handle it), before implementation.
+- The plugin sandboxing/security model is described at the philosophy level but sandboxing arbitrary third-party tool code safely and _conveniently_ (without making every plugin author fight the sandbox) is a genuinely hard, unsolved-in-general problem — this deserves its own dedicated design pass, likely informed by prior art (e.g., how VS Code, Obsidian, or browser extension platforms handle it), before implementation.
 - The monorepo recommendation optimizes for pre-1.0 velocity but under-specifies how/when core modules would eventually be allowed to split out (if ever) — that transition criterion should probably be an explicit ADR rather than left implicit.
 - "Automatic everything, with override always available" is stated as a hard requirement but isn't yet reflected in a concrete UX or API contract — this needs to be a first-class design artifact of its own (not just a principle) before implementation starts, or it will get quietly dropped under time pressure.

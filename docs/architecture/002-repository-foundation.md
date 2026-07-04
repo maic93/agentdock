@@ -94,64 +94,76 @@ agentdock/
 ### Directory-by-directory rationale
 
 **`apps/`**
-- *Why it exists:* Houses deployable, user-facing programs. Nothing in here is importable by anything outside itself.
-- *What belongs:* `web` (UI), `api` (public HTTP/gRPC surface), `cli` (future).
-- *What never belongs:* Business logic. Apps compose kernel/foundation packages and render/expose them; they do not implement orchestration logic themselves. An app with a "planner" file inside it is a boundary violation.
+
+- _Why it exists:_ Houses deployable, user-facing programs. Nothing in here is importable by anything outside itself.
+- _What belongs:_ `web` (UI), `api` (public HTTP/gRPC surface), `cli` (future).
+- _What never belongs:_ Business logic. Apps compose kernel/foundation packages and render/expose them; they do not implement orchestration logic themselves. An app with a "planner" file inside it is a boundary violation.
 
 **`packages/kernel/`**
-- *Why it exists:* The orchestration brain, as defined in the approved architecture. Grouped together because these modules evolve in lockstep during pre-1.0.
-- *What belongs:* Planner, Workflow Engine, AI Router, Prompt Builder, Model Registry, Tool Registry, Event Bus.
-- *What never belongs:* Any concrete provider or tool implementation. Kernel code may depend on `provider-abstraction`'s interfaces, never on `plugins/provider-openai` or similar.
+
+- _Why it exists:_ The orchestration brain, as defined in the approved architecture. Grouped together because these modules evolve in lockstep during pre-1.0.
+- _What belongs:_ Planner, Workflow Engine, AI Router, Prompt Builder, Model Registry, Tool Registry, Event Bus.
+- _What never belongs:_ Any concrete provider or tool implementation. Kernel code may depend on `provider-abstraction`'s interfaces, never on `plugins/provider-openai` or similar.
 
 **`packages/foundation/`**
-- *Why it exists:* Infrastructure-facing services the kernel and apps both need, but which are not orchestration logic themselves.
-- *What belongs:* Memory, Knowledge Base, Artifact Manager, Scheduler, Auth, Config, DB access layer, Observability.
-- *What never belongs:* Task-graph or routing logic — foundation packages are consumed by the kernel, they don't contain kernel decisions.
+
+- _Why it exists:_ Infrastructure-facing services the kernel and apps both need, but which are not orchestration logic themselves.
+- _What belongs:_ Memory, Knowledge Base, Artifact Manager, Scheduler, Auth, Config, DB access layer, Observability.
+- _What never belongs:_ Task-graph or routing logic — foundation packages are consumed by the kernel, they don't contain kernel decisions.
 
 **`packages/providers/provider-abstraction/`**
-- *Why it exists:* A single, minimal, stable interface that all model/search/tool providers implement. Kept separate from `foundation` because it's a contract, not a service.
-- *What belongs:* Interfaces, type definitions, provider capability schemas, a provider test-conformance kit.
-- *What never belongs:* Any concrete provider implementation (those are plugins, deliberately outside `packages/`).
+
+- _Why it exists:_ A single, minimal, stable interface that all model/search/tool providers implement. Kept separate from `foundation` because it's a contract, not a service.
+- _What belongs:_ Interfaces, type definitions, provider capability schemas, a provider test-conformance kit.
+- _What never belongs:_ Any concrete provider implementation (those are plugins, deliberately outside `packages/`).
 
 **`packages/shared/`**
-- *Why it exists:* Cross-cutting code with no home in kernel/foundation, needed by multiple apps or packages.
-- *What belongs:* Shared TypeScript types/schemas, the plugin-authoring SDK, shared testing utilities, the UI design system.
-- *What never belongs:* Anything with orchestration or business logic — if it has a decision to make, it's not "shared," it belongs in kernel or foundation.
+
+- _Why it exists:_ Cross-cutting code with no home in kernel/foundation, needed by multiple apps or packages.
+- _What belongs:_ Shared TypeScript types/schemas, the plugin-authoring SDK, shared testing utilities, the UI design system.
+- _What never belongs:_ Anything with orchestration or business logic — if it has a decision to make, it's not "shared," it belongs in kernel or foundation.
 
 **`plugins/`**
-- *Why it exists:* Proves the plugin system works, and gives contributors copyable reference implementations. Deliberately kept minimal.
-- *What belongs:* A small number of first-party provider and tool plugins, built strictly against the public plugin SDK — no special internal access.
-- *What never belongs:* The bulk of the plugin ecosystem. Third-party and most community plugins live in **separate repositories** and are discovered via the plugin registry at runtime, not committed here. This directory must never become a dumping ground for "just one more provider," or it silently defeats the plugin architecture's purpose.
+
+- _Why it exists:_ Proves the plugin system works, and gives contributors copyable reference implementations. Deliberately kept minimal.
+- _What belongs:_ A small number of first-party provider and tool plugins, built strictly against the public plugin SDK — no special internal access.
+- _What never belongs:_ The bulk of the plugin ecosystem. Third-party and most community plugins live in **separate repositories** and are discovered via the plugin registry at runtime, not committed here. This directory must never become a dumping ground for "just one more provider," or it silently defeats the plugin architecture's purpose.
 
 **`docs/`**
-- *Why it exists:* Documentation is a first-class deliverable for a project targeting 1000+ contributors, not an afterthought.
-- *What belongs:* Architecture docs, ADRs, RFCs, plugin guides, contribution guides, generated API reference, tutorials.
-- *What never belongs:* Docs that only make sense next to one specific package's code (those live as a `README.md` inside that package instead, and are aggregated into `docs/` by tooling, not duplicated by hand).
+
+- _Why it exists:_ Documentation is a first-class deliverable for a project targeting 1000+ contributors, not an afterthought.
+- _What belongs:_ Architecture docs, ADRs, RFCs, plugin guides, contribution guides, generated API reference, tutorials.
+- _What never belongs:_ Docs that only make sense next to one specific package's code (those live as a `README.md` inside that package instead, and are aggregated into `docs/` by tooling, not duplicated by hand).
 
 **`examples/`**
-- *Why it exists:* Working, runnable demonstrations, distinct from documentation prose.
-- *What belongs:* Sample workflow templates, sample plugins built from `templates/`.
-- *What never belongs:* Anything the core system depends on at runtime. Examples must be safely deletable without breaking a build.
+
+- _Why it exists:_ Working, runnable demonstrations, distinct from documentation prose.
+- _What belongs:_ Sample workflow templates, sample plugins built from `templates/`.
+- _What never belongs:_ Anything the core system depends on at runtime. Examples must be safely deletable without breaking a build.
 
 **`scripts/`**
-- *Why it exists:* Centralizes automation so it's discoverable rather than scattered as one-off shell snippets in random package folders.
-- *What belongs:* Setup/bootstrap scripts, release automation, CI helper scripts.
-- *What never belongs:* Application or library logic. If a script grows business rules, that logic should move into a proper package and the script should just invoke it.
+
+- _Why it exists:_ Centralizes automation so it's discoverable rather than scattered as one-off shell snippets in random package folders.
+- _What belongs:_ Setup/bootstrap scripts, release automation, CI helper scripts.
+- _What never belongs:_ Application or library logic. If a script grows business rules, that logic should move into a proper package and the script should just invoke it.
 
 **`infra/`**
-- *Why it exists:* Deployment/infrastructure definitions, kept separate from application code so infra changes don't require touching (or reviewing against) app code ownership rules.
-- *What belongs:* Docker Compose files for self-hosting, Helm charts (future), optional Terraform reference configs (future).
-- *What never belongs:* Application configuration defaults (those live in `packages/foundation/config`) — infra provisions *where* things run, not *how they behave*.
+
+- _Why it exists:_ Deployment/infrastructure definitions, kept separate from application code so infra changes don't require touching (or reviewing against) app code ownership rules.
+- _What belongs:_ Docker Compose files for self-hosting, Helm charts (future), optional Terraform reference configs (future).
+- _What never belongs:_ Application configuration defaults (those live in `packages/foundation/config`) — infra provisions _where_ things run, not _how they behave_.
 
 **`tests/e2e` and `tests/contract`**
-- *Why it exists:* Cross-package tests that don't belong to any single package (unit/integration tests live alongside the code they test, inside each package).
-- *What belongs:* Full end-to-end scenario tests (goal-in, artifact-out), and contract tests that verify plugins/providers conform to `provider-abstraction` interfaces.
-- *What never belongs:* Unit tests for a single module — those stay colocated with their source.
+
+- _Why it exists:_ Cross-package tests that don't belong to any single package (unit/integration tests live alongside the code they test, inside each package).
+- _What belongs:_ Full end-to-end scenario tests (goal-in, artifact-out), and contract tests that verify plugins/providers conform to `provider-abstraction` interfaces.
+- _What never belongs:_ Unit tests for a single module — those stay colocated with their source.
 
 **`templates/`**
-- *Why it exists:* Scaffolding for contributors creating new plugins or workflow templates, generated via CLI tooling.
-- *What belongs:* Minimal, well-commented starter code structures.
-- *What never belongs:* Anything actually used at runtime by core.
+
+- _Why it exists:_ Scaffolding for contributors creating new plugins or workflow templates, generated via CLI tooling.
+- _What belongs:_ Minimal, well-commented starter code structures.
+- _What never belongs:_ Anything actually used at runtime by core.
 
 ---
 
@@ -159,13 +171,13 @@ agentdock/
 
 ### Comparison
 
-| Tool | Advantages | Disadvantages |
-|---|---|---|
-| **pnpm workspaces (alone)** | Fast, disk-efficient installs; strict dependency isolation (no phantom deps) by default; simple mental model; minimal config surface | No built-in task orchestration, caching, or affected-package detection — you'd hand-roll CI logic |
-| **Yarn workspaces (alone)** | Mature, widely known | Similar gaps to pnpm-alone; less strict dependency isolation than pnpm by default (more prone to phantom dependency bugs at scale) |
-| **Turborepo** | Very fast incremental builds via content-based caching (local + remote); simple config (`turbo.json`); low learning curve; works on top of pnpm/Yarn/npm workspaces rather than replacing them | Less built-in tooling for code generation, dependency-graph linting, and enforced module boundaries compared to Nx; younger plugin ecosystem |
-| **Nx** | Strong built-in dependency-graph visualization and **enforced module boundary rules** (directly relevant to the Dependency Rules section below); powerful code generators; mature plugin ecosystem; scales well to very large monorepos (proven at that scale elsewhere) | Steeper learning curve; more configuration surface; can feel heavyweight for contributors used to plain package managers; some "magic" that can obscure what's actually happening under the hood for newcomers |
-| **Bazel** | Best-in-class build correctness/hermeticity and scale (Google-proven at extreme scale) | Very steep learning curve, poor fit for a JS/TS-centric OSS project with a broad, mixed-experience contributor base; would actively hurt onboarding, contradicting a stated project goal |
+| Tool                        | Advantages                                                                                                                                                                                                                                                               | Disadvantages                                                                                                                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **pnpm workspaces (alone)** | Fast, disk-efficient installs; strict dependency isolation (no phantom deps) by default; simple mental model; minimal config surface                                                                                                                                     | No built-in task orchestration, caching, or affected-package detection — you'd hand-roll CI logic                                                                                                              |
+| **Yarn workspaces (alone)** | Mature, widely known                                                                                                                                                                                                                                                     | Similar gaps to pnpm-alone; less strict dependency isolation than pnpm by default (more prone to phantom dependency bugs at scale)                                                                             |
+| **Turborepo**               | Very fast incremental builds via content-based caching (local + remote); simple config (`turbo.json`); low learning curve; works on top of pnpm/Yarn/npm workspaces rather than replacing them                                                                           | Less built-in tooling for code generation, dependency-graph linting, and enforced module boundaries compared to Nx; younger plugin ecosystem                                                                   |
+| **Nx**                      | Strong built-in dependency-graph visualization and **enforced module boundary rules** (directly relevant to the Dependency Rules section below); powerful code generators; mature plugin ecosystem; scales well to very large monorepos (proven at that scale elsewhere) | Steeper learning curve; more configuration surface; can feel heavyweight for contributors used to plain package managers; some "magic" that can obscure what's actually happening under the hood for newcomers |
+| **Bazel**                   | Best-in-class build correctness/hermeticity and scale (Google-proven at extreme scale)                                                                                                                                                                                   | Very steep learning curve, poor fit for a JS/TS-centric OSS project with a broad, mixed-experience contributor base; would actively hurt onboarding, contradicting a stated project goal                       |
 
 ### Recommendation: **pnpm workspaces + Nx**
 
@@ -185,6 +197,7 @@ agentdock/
 For each package: purpose, public API surface, allowed/forbidden dependencies, who may import it, and what must stay internal.
 
 ### `packages/kernel/planner`
+
 - **Purpose:** Convert a goal into a task graph (DAG).
 - **Public API:** `planGoal(goal, context) -> TaskGraph`; task graph type definitions (re-exported from `shared/types`).
 - **Dependencies allowed:** `shared/types`, `foundation/knowledge-base` (read-only, for context retrieval), `providers/provider-abstraction` (to query model capabilities, not to call models directly for non-planning purposes).
@@ -193,6 +206,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Internal heuristics/prompt strategies used to decompose goals; only the `TaskGraph` output shape is a public contract.
 
 ### `packages/kernel/workflow-engine`
+
 - **Purpose:** Execute a task graph: ordering, parallelism, retries, state persistence.
 - **Public API:** `executePlan(taskGraph) -> ExecutionHandle`; execution state/event types.
 - **Dependencies allowed:** `shared/types`, `kernel/ai-router`, `kernel/tool-registry`, `kernel/event-bus`, `foundation/artifact-manager`, `foundation/db`.
@@ -201,6 +215,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Retry/backoff internals, execution state machine implementation details.
 
 ### `packages/kernel/ai-router`
+
 - **Purpose:** Select a concrete model for a task given declared capability + constraints.
 - **Public API:** `selectModel(capability, constraints) -> ModelHandle`.
 - **Dependencies allowed:** `kernel/model-registry`, `providers/provider-abstraction`, `shared/types`.
@@ -209,6 +224,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Routing heuristics/weightings, fallback-chain ordering logic.
 
 ### `packages/kernel/tool-registry`
+
 - **Purpose:** Catalog and resolve available tools for task execution.
 - **Public API:** `resolveTool(capability) -> ToolHandle`; tool metadata schema.
 - **Dependencies allowed:** `shared/types`, `shared/sdk` (to validate plugin manifests).
@@ -217,6 +233,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Plugin discovery/loading mechanics.
 
 ### `packages/kernel/prompt-builder`
+
 - **Purpose:** Assemble model-specific prompts from task context.
 - **Public API:** `buildPrompt(task, modelHandle, context) -> Prompt`.
 - **Dependencies allowed:** `shared/types`, `foundation/memory` (read-only), `foundation/knowledge-base` (read-only).
@@ -225,6 +242,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Per-model prompt templates/heuristics.
 
 ### `packages/kernel/model-registry` and `kernel/event-bus`
+
 - **Purpose:** Model metadata catalog; async pub/sub backbone, respectively.
 - **Public API:** `registerModel`/`queryModels`; `publish`/`subscribe` with typed event schemas.
 - **Dependencies allowed:** `shared/types` only.
@@ -233,6 +251,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** N/A — these are thin, mostly-public-surface packages by design.
 
 ### `packages/foundation/*` (memory, knowledge-base, artifact-manager, scheduler, auth, config, db, observability)
+
 - **Purpose:** Infrastructure services consumed by the kernel and apps.
 - **Public API:** One typed service interface per package (e.g., `MemoryStore`, `ArtifactManager`), never raw DB access exposed outward.
 - **Dependencies allowed:** `shared/types`, `foundation/db` (for packages that need persistence), `foundation/config`.
@@ -241,6 +260,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Storage schema details, migration internals — only the service interface is public.
 
 ### `packages/providers/provider-abstraction`
+
 - **Purpose:** The contract every model/search/tool provider implements.
 - **Public API:** `ModelProvider`, `SearchProvider`, `ToolProvider` interfaces; a conformance test kit for plugin authors.
 - **Dependencies allowed:** `shared/types` only.
@@ -249,6 +269,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Nothing — this is intentionally the most public package in the system.
 
 ### `packages/shared/sdk`
+
 - **Purpose:** Plugin-authoring SDK (manifest schema, lifecycle hooks, sandboxing helpers).
 - **Public API:** Everything in it, by definition — this is the primary contract for third-party developers.
 - **Dependencies allowed:** `shared/types`, `providers/provider-abstraction`.
@@ -257,6 +278,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** N/A, public by design; must be held to the strictest backward-compatibility/semver discipline in the repo since it's the most widely depended-upon external contract.
 
 ### `plugins/*`
+
 - **Purpose:** Concrete, sandboxed implementations of providers/tools.
 - **Public API:** Whatever `shared/sdk` requires them to expose (manifest + capability implementation).
 - **Dependencies allowed:** `shared/sdk`, `providers/provider-abstraction`, `shared/types`, third-party libraries specific to that plugin's integration.
@@ -265,6 +287,7 @@ For each package: purpose, public API surface, allowed/forbidden dependencies, w
 - **Must remain internal:** Everything not exposed through the SDK-mandated interface.
 
 ### `apps/web`, `apps/api`
+
 - **Purpose:** User-facing interfaces.
 - **Public API:** N/A (apps are leaves in the dependency graph; nothing imports them).
 - **Dependencies allowed:** `kernel/*` (through their public APIs only), `foundation/*` (through their public APIs only), `shared/*`.
@@ -294,7 +317,7 @@ Explicit rules, stated as enforceable Nx boundary constraints:
 1. **UI cannot import the database directly.** `apps/web` must go through `apps/api`, which itself only reaches persistence through `foundation/db`'s service interfaces — never raw queries from an app.
 2. **Planner cannot import concrete providers directly.** `kernel/planner` may query `providers/provider-abstraction` for capability metadata, but must never import a specific plugin like `plugins/provider-openai`. Model selection is the AI Router's job, not the Planner's.
 3. **Plugins cannot access kernel internals.** `plugins/*` may only depend on `shared/sdk` and `providers/provider-abstraction`. A plugin importing anything from `kernel/*` or `foundation/*` is a build-breaking violation, enforced by Nx module boundary tags, not just review.
-4. **Foundation packages must not depend on applications**, and must not depend on `kernel/*` either — foundation sits *below* the kernel in the dependency graph, providing services the kernel consumes, never the reverse. A `foundation/memory` package that imports something from `kernel/workflow-engine` indicates a layering mistake.
+4. **Foundation packages must not depend on applications**, and must not depend on `kernel/*` either — foundation sits _below_ the kernel in the dependency graph, providing services the kernel consumes, never the reverse. A `foundation/memory` package that imports something from `kernel/workflow-engine` indicates a layering mistake.
 5. **No package may import another package's non-exported internals** — every package has exactly one public entry point (its `index`), and deep-importing into another package's internal folders is forbidden and lint-enforced.
 6. **`shared/*` packages may depend only on each other or on nothing** — they are the foundation of the foundation, and must never depend upward on `kernel/*`, `foundation/*`, `providers/*`, or `apps/*`.
 7. **No circular dependencies between packages, ever** — enforced automatically via Nx's dependency graph checks in CI; a PR introducing a cycle fails the build regardless of review sign-off.
@@ -306,25 +329,25 @@ These rules are enforced via Nx's project tagging (e.g., `scope:kernel`, `scope:
 
 ## 5. Naming Standards
 
-| Category | Convention | Example |
-|---|---|---|
-| Packages | `kebab-case`, scoped npm-style: `@agentdock/<layer>-<name>` | `@agentdock/kernel-planner` |
-| Folders | `kebab-case` | `workflow-engine/` |
-| Files | `kebab-case.ts`, test files `*.spec.ts` colocated | `task-graph.ts`, `task-graph.spec.ts` |
-| Interfaces | `PascalCase`, no `I` prefix (modern TS convention) | `ModelProvider`, `TaskGraph` |
-| Classes | `PascalCase` | `WorkflowEngine` |
-| Types | `PascalCase` | `TaskStatus` |
-| Enums | `PascalCase` name, `PascalCase` members | `enum TaskState { Pending, Running, Failed }` |
-| Events | `<domain>.<past-tense-verb>`, dot-namespaced | `plan.created`, `task.failed` |
-| Commands | `<Verb><Noun>Command`, imperative | `ExecuteTaskCommand` |
-| Queries | `<Verb><Noun>Query`, imperative, read-only intent explicit | `GetPlanStatusQuery` |
-| Database tables | `snake_case`, plural | `task_executions`, `artifacts` |
-| API routes | `kebab-case`, versioned, resource-plural REST convention | `/v1/plans`, `/v1/plans/:id/tasks` |
-| Plugin IDs | reverse-DNS-style namespacing to prevent collisions at 500+ plugin scale | `dev.agentdock.provider.ollama`, `com.acme.tool.pdf-export` |
-| Environment variables | `SCREAMING_SNAKE_CASE`, prefixed by subsystem | `AGENTDOCK_DB_URL`, `AGENTDOCK_AI_ROUTER_DEFAULT_TIER` |
-| Docker images | `agentdock/<component>:<semver-or-tag>` | `agentdock/api:1.4.0` |
-| Git branches | `<type>/<short-description>`, types: `feat`, `fix`, `chore`, `docs`, `rfc` | `feat/scheduler-cron-triggers` |
-| Git tags | Semantic versioning, `v` prefixed | `v1.4.0`, `v2.0.0-beta.1` |
+| Category              | Convention                                                                 | Example                                                     |
+| --------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Packages              | `kebab-case`, scoped npm-style: `@agentdock/<layer>-<name>`                | `@agentdock/kernel-planner`                                 |
+| Folders               | `kebab-case`                                                               | `workflow-engine/`                                          |
+| Files                 | `kebab-case.ts`, test files `*.spec.ts` colocated                          | `task-graph.ts`, `task-graph.spec.ts`                       |
+| Interfaces            | `PascalCase`, no `I` prefix (modern TS convention)                         | `ModelProvider`, `TaskGraph`                                |
+| Classes               | `PascalCase`                                                               | `WorkflowEngine`                                            |
+| Types                 | `PascalCase`                                                               | `TaskStatus`                                                |
+| Enums                 | `PascalCase` name, `PascalCase` members                                    | `enum TaskState { Pending, Running, Failed }`               |
+| Events                | `<domain>.<past-tense-verb>`, dot-namespaced                               | `plan.created`, `task.failed`                               |
+| Commands              | `<Verb><Noun>Command`, imperative                                          | `ExecuteTaskCommand`                                        |
+| Queries               | `<Verb><Noun>Query`, imperative, read-only intent explicit                 | `GetPlanStatusQuery`                                        |
+| Database tables       | `snake_case`, plural                                                       | `task_executions`, `artifacts`                              |
+| API routes            | `kebab-case`, versioned, resource-plural REST convention                   | `/v1/plans`, `/v1/plans/:id/tasks`                          |
+| Plugin IDs            | reverse-DNS-style namespacing to prevent collisions at 500+ plugin scale   | `dev.agentdock.provider.ollama`, `com.acme.tool.pdf-export` |
+| Environment variables | `SCREAMING_SNAKE_CASE`, prefixed by subsystem                              | `AGENTDOCK_DB_URL`, `AGENTDOCK_AI_ROUTER_DEFAULT_TIER`      |
+| Docker images         | `agentdock/<component>:<semver-or-tag>`                                    | `agentdock/api:1.4.0`                                       |
+| Git branches          | `<type>/<short-description>`, types: `feat`, `fix`, `chore`, `docs`, `rfc` | `feat/scheduler-cron-triggers`                              |
+| Git tags              | Semantic versioning, `v` prefixed                                          | `v1.4.0`, `v2.0.0-beta.1`                                   |
 
 Naming standards are enforced via a shared ESLint config plus Nx generators (Section 2) so that scaffolded code is compliant by construction rather than by post-hoc review correction.
 
@@ -336,7 +359,7 @@ Documentation is treated as a tested, versioned deliverable — not prose that d
 
 - **README.md (root):** Elevator pitch, quickstart, links out to everything below. Kept intentionally short — it's a front door, not a manual.
 - **Getting Started (`docs/`):** Zero-to-running-locally in under 10 minutes, for both "just try it" (Docker Compose) and "I want to contribute code" (full dev setup) paths, kept as two clearly separate tracks.
-- **Architecture (`docs/architecture/`):** The approved Prompt 001 design document and this repository design document live here as the canonical source of truth, kept up to date as the system evolves — with ADRs (below) capturing *why* things changed rather than editing history away.
+- **Architecture (`docs/architecture/`):** The approved Prompt 001 design document and this repository design document live here as the canonical source of truth, kept up to date as the system evolves — with ADRs (below) capturing _why_ things changed rather than editing history away.
 - **Plugin Development Guide (`docs/plugin-guide/`):** The single most important doc for ecosystem growth at 500+ plugin scale — covers the SDK, manifest schema, sandboxing constraints, testing a plugin locally, and the publishing/verification process.
 - **Contribution Guide (`docs/contributing/` + root `CONTRIBUTING.md`):** Full dev workflow (Section 8), code style, PR expectations, how to propose an RFC.
 - **Code Style:** A short, opinionated doc pointing to the enforced linter config rather than restating rules prose can drift from — "the linter is the source of truth" is explicit.
@@ -365,16 +388,16 @@ Documentation is treated as a tested, versioned deliverable — not prose that d
 
 ## 8. Testing Strategy
 
-| Test type | Scope | Lives in |
-|---|---|---|
-| Unit tests | Single function/class/module in isolation | Colocated with source (`*.spec.ts`) |
-| Integration tests | Multiple modules within one package (e.g., Planner + its knowledge-base read path) | Colocated, or a package-local `__integration__/` folder |
-| End-to-end tests | Full goal-in → artifact-out flow across real (or realistically mocked) services | `tests/e2e/` |
-| Contract tests | Verify a provider/tool plugin correctly implements `provider-abstraction` interfaces | `tests/contract/`, run against every first-party plugin and offered as a CLI tool (`agentdock plugin test`) for third-party authors |
-| Plugin compatibility tests | Run the contract test suite against community plugins in CI on a schedule, flagging breakage from core changes early | `tests/contract/` + scheduled CI workflow |
-| Performance tests | Routing latency overhead, workflow engine throughput under concurrent plans | `tests/performance/` (benchmarked, not pass/fail gated, tracked over time) |
-| Security tests | Sandbox escape attempts, permission boundary checks for plugins, dependency vulnerability scanning | `tests/security/` + scheduled scans (Section 10) |
-| Regression tests | Captured from real closed bugs, one test per fixed bug, permanently retained | Colocated with the fixing package, tagged `regression` |
+| Test type                  | Scope                                                                                                                | Lives in                                                                                                                            |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Unit tests                 | Single function/class/module in isolation                                                                            | Colocated with source (`*.spec.ts`)                                                                                                 |
+| Integration tests          | Multiple modules within one package (e.g., Planner + its knowledge-base read path)                                   | Colocated, or a package-local `__integration__/` folder                                                                             |
+| End-to-end tests           | Full goal-in → artifact-out flow across real (or realistically mocked) services                                      | `tests/e2e/`                                                                                                                        |
+| Contract tests             | Verify a provider/tool plugin correctly implements `provider-abstraction` interfaces                                 | `tests/contract/`, run against every first-party plugin and offered as a CLI tool (`agentdock plugin test`) for third-party authors |
+| Plugin compatibility tests | Run the contract test suite against community plugins in CI on a schedule, flagging breakage from core changes early | `tests/contract/` + scheduled CI workflow                                                                                           |
+| Performance tests          | Routing latency overhead, workflow engine throughput under concurrent plans                                          | `tests/performance/` (benchmarked, not pass/fail gated, tracked over time)                                                          |
+| Security tests             | Sandbox escape attempts, permission boundary checks for plugins, dependency vulnerability scanning                   | `tests/security/` + scheduled scans (Section 10)                                                                                    |
+| Regression tests           | Captured from real closed bugs, one test per fixed bug, permanently retained                                         | Colocated with the fixing package, tagged `regression`                                                                              |
 
 Testing philosophy: **unit tests are mandatory for all kernel/foundation code (high coverage bar), contract tests are mandatory for all plugins (first-party and community), and e2e tests cover a curated set of representative goals rather than attempting exhaustive coverage** (goal-space is combinatorially large; e2e tests should validate the orchestration mechanics, not attempt to test every possible user request).
 
@@ -423,14 +446,14 @@ Testing philosophy: **unit tests are mandatory for all kernel/foundation code (h
 
 ## 12. Risks
 
-| Risk | Mitigation |
-|---|---|
-| Nx's learning curve slows early contributor onboarding | Invest in a very fast `setup` script and a short "Nx for AgentDock contributors" doc covering only the handful of commands actually needed day-to-day |
-| Dependency-boundary enforcement is set up once and then quietly weakened over time under delivery pressure | Boundary rules live in CI as a hard gate, not a warning; any exception requires an ADR, not a one-off override |
-| `plugins/` directory scope-creeps into hosting most of the ecosystem instead of staying reference-only | Explicit contribution guidelines state new provider/tool plugins beyond the reference set should be proposed as separate repos; PRs adding new plugins to this directory get extra scrutiny |
-| Independent per-package semver becomes confusing for consumers trying to track "what version of AgentDock am I running" | A top-level "platform version" is still published (an umbrella release tag) even though individual packages version independently |
-| Documentation drifts from code despite the strategy above, especially generated API docs falling out of CI | Doc generation is a CI-gated step (broken doc generation fails the build, same as a broken test) |
-| Governance model concentrates too much power in a small core team, discouraging broader contribution over time | Roadmap includes revisiting governance formally once the contributor base reaches a defined size threshold (e.g., a governance ADR review triggered at a set contributor-count milestone) |
+| Risk                                                                                                                    | Mitigation                                                                                                                                                                                  |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nx's learning curve slows early contributor onboarding                                                                  | Invest in a very fast `setup` script and a short "Nx for AgentDock contributors" doc covering only the handful of commands actually needed day-to-day                                       |
+| Dependency-boundary enforcement is set up once and then quietly weakened over time under delivery pressure              | Boundary rules live in CI as a hard gate, not a warning; any exception requires an ADR, not a one-off override                                                                              |
+| `plugins/` directory scope-creeps into hosting most of the ecosystem instead of staying reference-only                  | Explicit contribution guidelines state new provider/tool plugins beyond the reference set should be proposed as separate repos; PRs adding new plugins to this directory get extra scrutiny |
+| Independent per-package semver becomes confusing for consumers trying to track "what version of AgentDock am I running" | A top-level "platform version" is still published (an umbrella release tag) even though individual packages version independently                                                           |
+| Documentation drifts from code despite the strategy above, especially generated API docs falling out of CI              | Doc generation is a CI-gated step (broken doc generation fails the build, same as a broken test)                                                                                            |
+| Governance model concentrates too much power in a small core team, discouraging broader contribution over time          | Roadmap includes revisiting governance formally once the contributor base reaches a defined size threshold (e.g., a governance ADR review triggered at a set contributor-count milestone)   |
 
 ---
 
@@ -447,11 +470,13 @@ Testing philosophy: **unit tests are mandatory for all kernel/foundation code (h
 ## Self-Critique
 
 **What this design does well:**
+
 - The Nx-enforced dependency boundary rules are the single highest-leverage decision in this document — they convert the "prevent architecture erosion" requirement from a documentation aspiration into a CI-enforced mechanical guarantee, which is genuinely necessary (not just nice-to-have) at a 1000-contributor, 500-plugin scale.
-- Keeping the bulk of the plugin ecosystem *outside* this repository, with only a minimal reference set inside, is a deliberate and important constraint — the biggest way monorepos like this fail at scale is by accumulating "just one more integration" until the repo itself becomes the bottleneck.
+- Keeping the bulk of the plugin ecosystem _outside_ this repository, with only a minimal reference set inside, is a deliberate and important constraint — the biggest way monorepos like this fail at scale is by accumulating "just one more integration" until the repo itself becomes the bottleneck.
 - Independent per-package semver plus a lightweight umbrella version tag balances two real needs (accurate per-package versioning vs. a human-friendly "what version am I on" answer) rather than forcing an artificial single choice.
 
 **Honest weaknesses and things that should be deferred:**
+
 - This entire structure is being designed for a scale (1000+ contributors, 500+ plugins) that doesn't exist yet. Several pieces here — the tiered plugin verification system, the formal RFC process, the core-team/maintainer governance split — are almost certainly over-built for a project that, per Prompt 001, starts from a genuinely empty repository. These should be treated as a **target end-state to design toward**, not a day-one requirement; a real first version likely launches with a much smaller, informal governance model (a handful of maintainers, no formal RFC process yet) and grows into this structure as the numbers actually warrant it.
 - The Nx dependency-boundary tagging scheme is described at the policy level but the actual tag taxonomy (`scope:kernel` vs finer-grained per-module tags) will need real iteration once contributors start hitting edge cases the design didn't anticipate — this should be expected to change via ADR within the first several months, not treated as fixed.
 - The testing strategy's plugin-compatibility CI job (running contract tests against community plugins on a schedule) has a real operational cost (compute, and handling third-party plugin flakiness/failures polluting CI signal) that isn't addressed here — this needs its own design pass on isolation and failure-attribution before it's built, or it risks becoming noisy and ignored.

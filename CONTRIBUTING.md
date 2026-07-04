@@ -1,7 +1,7 @@
 # Contributing to AgentDock
 
 Thank you for considering a contribution. This document covers the practical
-mechanics of contributing. For *why* the repository is shaped the way it is,
+mechanics of contributing. For _why_ the repository is shaped the way it is,
 read [docs/architecture](./docs/architecture/README.md) first — most "why
 can't I just do X" questions are answered there.
 

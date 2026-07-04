@@ -6,6 +6,15 @@
 # Goals: Windows/Linux/macOS all supported).
 set -euo pipefail
 
+echo "==> Working around a known Nx daemon issue on long paths"
+# See .github/workflows/ci.yml for the full explanation: Nx's daemon socket
+# path can exceed OS limits on deep clone paths (this is not Windows-only,
+# but is more likely there given typical path depths). Pointing it at a
+# short tmp dir avoids the failure. Add this to your shell profile if you
+# want it to persist beyond this script.
+export NX_SOCKET_DIR="${NX_SOCKET_DIR:-/tmp/nx-agentdock}"
+mkdir -p "$NX_SOCKET_DIR"
+
 echo "==> Checking Node.js version against .nvmrc"
 required_node="$(cat .nvmrc)"
 if ! command -v node >/dev/null 2>&1; then

@@ -27,5 +27,5 @@ document, not restated here.
 Architecture and repository-foundation decisions are not changed by editing
 these files directly. Propose a change via an RFC
 ([docs/rfcs/0000-template.md](../rfcs/0000-template.md)); once accepted, the
-decision is recorded as a new ADR ([docs/adr/](../adr/README.md)) and *then*
+decision is recorded as a new ADR ([docs/adr/](../adr/README.md)) and _then_
 these documents are updated to reflect the new approved state.

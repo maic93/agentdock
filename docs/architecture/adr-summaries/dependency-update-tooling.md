@@ -12,12 +12,14 @@ dependency updates. Do not adopt Renovate at this stage.
 ## Reasoning
 
 **Renovate's advantages** (acknowledged, not dismissed):
+
 - Far more configurable grouping, scheduling, and auto-merge rules.
 - Better native monorepo awareness in some edge cases (e.g., internal
   workspace package version bump propagation).
 - A single unified dashboard issue instead of one PR per group.
 
 **Why Dependabot wins for AgentDock at this stage anyway:**
+
 1. **Zero external setup.** Dependabot is built into GitHub with no app
    installation, no separate hosted/self-hosted bot infrastructure, and no
    additional account for new maintainers to reason about. For a project

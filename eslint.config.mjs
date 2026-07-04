@@ -9,6 +9,7 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import nxEslintPlugin from "@nx/eslint-plugin";
 import prettierConfig from "eslint-config-prettier";
+import globals from "globals";
 
 export default tseslint.config(
   {
@@ -17,6 +18,16 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   prettierConfig,
+  {
+    // Root-level tooling config files are plain CommonJS, not TypeScript —
+    // without this, `module`/`require` trip the no-undef rule since the
+    // base config above assumes ES module scope.
+    files: ["**/*.cjs"],
+    languageOptions: {
+      sourceType: "commonjs",
+      globals: globals.node,
+    },
+  },
   {
     plugins: {
       "@nx": nxEslintPlugin,

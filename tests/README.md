@@ -1,7 +1,7 @@
 # tests/
 
 Cross-package tests that don't belong to any single package. Unit and
-integration tests live *colocated* with the source they test, inside each
+integration tests live _colocated_ with the source they test, inside each
 package (e.g. `packages/kernel/planner/src/*.spec.ts`) — not here.
 
 ## Subdirectories

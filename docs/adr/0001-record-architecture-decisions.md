@@ -28,16 +28,16 @@ editing history away.
 - **No formal record, rely on PR descriptions and commit history.** Rejected
   — PR history is not discoverable or skimmable as a coherent narrative; it
   requires archaeology rather than reading.
-  a design doc**
+  a design doc\*\*
 - **A single evolving `ARCHITECTURE.md` file, edited in place.** Rejected —
-  this loses the *history* of why something changed, which is often as
+  this loses the _history_ of why something changed, which is often as
   valuable as the current state, and produces large unreviewable diffs on a
   single sprawling file.
 
 ## Consequences
 
 Positive: decisions are discoverable, arguments don't need to be
-reconstructed from scratch, and new maintainers can understand *why*
+reconstructed from scratch, and new maintainers can understand _why_
 quickly. Negative: this adds process overhead — writing an ADR takes real
 effort, and there's a risk of either skipping it under time pressure or,
 conversely, over-applying it to decisions too small to warrant one. The

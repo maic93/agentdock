@@ -20,8 +20,8 @@ no foundation-layer code in this repository yet for a service to run.
 - Production deployment manifests — those belong in `infra/helm/` (Kubernetes)
   once that's built out.
 - Application configuration defaults — those belong in
-  `packages/foundation/config`; this directory provisions *where* things run,
-  not *how they behave*.
+  `packages/foundation/config`; this directory provisions _where_ things run,
+  not _how they behave_.
 - Placeholder service definitions for packages that don't exist yet. Add a
   service here only when its corresponding foundation package is actually
   implemented and needs something to run against locally.

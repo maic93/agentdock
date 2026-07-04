@@ -6,7 +6,7 @@ for testing the AI Router without a real provider).
 
 **May depend on:** `@agentdock/shared-types`, `@agentdock/provider-abstraction`.
 
-**Must never depend on:** any package's *implementation* — only its public
+**Must never depend on:** any package's _implementation_ — only its public
 types/interfaces, to avoid this package accidentally becoming a hidden
 runtime dependency of production code.
 

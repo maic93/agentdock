@@ -1,7 +1,7 @@
 # @agentdock/foundation-config
 
 **Purpose:** Layered configuration resolution (defaults → file → env →
-runtime override). This is the *only* package that should read
+runtime override). This is the _only_ package that should read
 `process.env` directly — everything else reads typed config through this
 package's interface.
 

@@ -8,6 +8,7 @@ with its status updated to `Superseded by ADR-00XX`.
 ## When to write one
 
 Write an ADR for any decision that:
+
 - Changes a dependency-boundary rule.
 - Adds, removes, or replaces a core piece of tooling (e.g., the monorepo
   tool, the versioning tool).
@@ -30,6 +31,6 @@ internal implementation details) don't need one.
 
 ## Index
 
-| ADR | Title | Status |
-|---|---|---|
+| ADR                                             | Title                                 | Status   |
+| ----------------------------------------------- | ------------------------------------- | -------- |
 | [0001](./0001-record-architecture-decisions.md) | Record architecture decisions as ADRs | Accepted |

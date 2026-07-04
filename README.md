@@ -23,7 +23,7 @@ place.
 ## Quickstart (run it locally)
 
 ```bash
-git clone https://github.com/agentdock/agentdock.git
+git clone https://github.com/maic93/agentdock.git
 cd agentdock
 cp .env.example .env
 pnpm install

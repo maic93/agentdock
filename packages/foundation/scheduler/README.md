@@ -9,7 +9,7 @@ plan forever.
 (register/cancel a recurring trigger).
 
 **May depend on:** `@agentdock/shared-types`, `@agentdock/foundation-db`,
-`@agentdock/foundation-config`. May *invoke* `kernel-workflow-engine` at
+`@agentdock/foundation-config`. May _invoke_ `kernel-workflow-engine` at
 trigger time (this is the one intentional exception where a foundation
 package calls into the kernel's public API — documented explicitly here
 because it looks like a boundary violation of the "foundation never depends
@@ -18,6 +18,6 @@ runtime invocation of a public entry point at trigger time, not a build-time
 import of kernel internals).
 
 **Must never depend on:** `apps/*`, `plugins/*`, or any `kernel/*` package's
-*internal* (non-exported) modules.
+_internal_ (non-exported) modules.
 
 **Status:** Not implemented.

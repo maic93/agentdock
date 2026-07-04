@@ -21,7 +21,5 @@
   },
   "postCreateCommand": "corepack enable && corepack prepare pnpm@9.7.0 --activate && pnpm install",
   "remoteUser": "node",
-  "mounts": [
-    "source=agentdock-pnpm-store,target=/home/node/.local/share/pnpm/store,type=volume"
-  ]
+  "mounts": ["source=agentdock-pnpm-store,target=/home/node/.local/share/pnpm/store,type=volume"]
 }

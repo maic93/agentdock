@@ -2,7 +2,7 @@
 
 **Purpose:** Execute a task graph produced by the Planner — ordering,
 parallelism, retries, and state persistence. A state machine, not a planner:
-it decides *when and how* to run what was planned, never *what* to do.
+it decides _when and how_ to run what was planned, never _what_ to do.
 
 **Public API (once implemented):** `executePlan(taskGraph) -> ExecutionHandle`.
 

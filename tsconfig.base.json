@@ -43,7 +43,9 @@
 
       "@agentdock/foundation-memory": ["packages/foundation/memory/src/index.ts"],
       "@agentdock/foundation-knowledge-base": ["packages/foundation/knowledge-base/src/index.ts"],
-      "@agentdock/foundation-artifact-manager": ["packages/foundation/artifact-manager/src/index.ts"],
+      "@agentdock/foundation-artifact-manager": [
+        "packages/foundation/artifact-manager/src/index.ts"
+      ],
       "@agentdock/foundation-scheduler": ["packages/foundation/scheduler/src/index.ts"],
       "@agentdock/foundation-auth": ["packages/foundation/auth/src/index.ts"],
       "@agentdock/foundation-config": ["packages/foundation/config/src/index.ts"],

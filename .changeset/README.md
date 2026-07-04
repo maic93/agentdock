@@ -5,6 +5,13 @@ Run `pnpm changeset` after making a change to a publishable package and
 follow the prompts — it generates a markdown file here describing the change
 and its semver impact, which is committed alongside your PR.
 
+> **Note:** `config.json`'s `ignore` list (for unpublished apps like
+> `@agentdock/web`/`@agentdock/api`/`@agentdock/cli`) is currently empty
+> because Changesets validates that every entry in `ignore` corresponds to a
+> real package in the workspace — since those apps don't exist yet, listing
+> them fails validation outright (this previously broke `changeset status`
+> in CI). Add each app back to `ignore` in the same PR that creates it.
+
 ## Why Changesets (and not a single repo-wide version)
 
 The approved repository foundation calls for **independent semantic
@@ -22,8 +29,8 @@ Changesets was chosen over the alternatives considered:
 - **Nx's built-in release versioning alone** — Nx does support conventional-
   commit-driven versioning (and this workspace's `nx.json` does enable
   `conventionalCommits: true` as a complementary signal), but Changesets
-  gives contributors an explicit, human-authored description of *what
-  changed and why it matters to consumers*, rather than relying solely on
+  gives contributors an explicit, human-authored description of _what
+  changed and why it matters to consumers_, rather than relying solely on
   commit message parsing to infer a changelog entry. For a project aiming
   for a large, distributed contributor base, an explicit changeset is a
   better artifact for less experienced contributors to get right than a
@@ -32,5 +39,5 @@ Changesets was chosen over the alternatives considered:
   scale of 1000+ contributors and 500+ plugins.
 
 Nx and Changesets are complementary here, not competing: Nx's `affected`
-graph determines *what* needs to be built/tested/released, and Changesets
-determines *what version number* a released package gets and why.
+graph determines _what_ needs to be built/tested/released, and Changesets
+determines _what version number_ a released package gets and why.
