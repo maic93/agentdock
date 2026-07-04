@@ -17,8 +17,17 @@ mkdir -p "$NX_SOCKET_DIR"
 
 echo "==> Checking Node.js version against .nvmrc"
 required_node="$(cat .nvmrc)"
+required_major="${required_node%%.*}"
 if ! command -v node >/dev/null 2>&1; then
   echo "Node.js is not installed. Install Node.js ${required_node} first (see https://nodejs.org or use nvm/fnm)." >&2
+  exit 1
+fi
+current_node="$(node -v)"
+current_major="${current_node#v}"
+current_major="${current_major%%.*}"
+if [ "$current_major" != "$required_major" ]; then
+  echo "Node.js major version mismatch: this repo requires Node ${required_node} (major v${required_major})," >&2
+  echo "but 'node' on your PATH is ${current_node}. Switch with 'nvm use' (reads .nvmrc) or 'fnm use'." >&2
   exit 1
 fi
 

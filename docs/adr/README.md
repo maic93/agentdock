@@ -31,6 +31,7 @@ internal implementation details) don't need one.
 
 ## Index
 
-| ADR                                             | Title                                 | Status   |
-| ----------------------------------------------- | ------------------------------------- | -------- |
-| [0001](./0001-record-architecture-decisions.md) | Record architecture decisions as ADRs | Accepted |
+| ADR                                             | Title                                                  | Status   |
+| ----------------------------------------------- | ------------------------------------------------------ | -------- |
+| [0001](./0001-record-architecture-decisions.md) | Record architecture decisions as ADRs                  | Accepted |
+| [0002](./0002-node-version-policy.md)           | Standardize on Node.js 24 (Active LTS), not Node.js 20 | Accepted |

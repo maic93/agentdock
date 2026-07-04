@@ -1,6 +1,6 @@
 {
   "name": "AgentDock",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-20-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-24-bullseye",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },

@@ -28,6 +28,15 @@ pnpm install
 Requirements: Node.js as pinned in [.nvmrc](./.nvmrc) (use `nvm use`), pnpm
 9+, Docker (for local service dependencies once they exist).
 
+**Node.js version policy:** this repository tracks the current Active LTS
+line (see [ADR 0002](./docs/adr/0002-node-version-policy.md) for why). The
+version in `.nvmrc` and `.node-version` must always match exactly, and CI
+(`.github/workflows/ci.yml`) and the dev container
+(`.devcontainer/devcontainer.json`) must always match the same major
+version. `scripts/setup/bootstrap.sh` checks this for you locally and fails
+loudly on a mismatch rather than letting it surface later as a confusing
+`pnpm install` error.
+
 ## Development loop
 
 ```bash
