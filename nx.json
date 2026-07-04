@@ -10,7 +10,7 @@
       "!{projectRoot}/tsconfig.spec.json",
       "!{projectRoot}/.eslintrc.*"
     ],
-    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json", "{workspaceRoot}/eslint.config.mjs"]
+    "sharedGlobals": ["{workspaceRoot}/tsconfig.base.json", "{workspaceRoot}/eslint.config.js"]
   },
   "targetDefaults": {
     "build": {
@@ -24,10 +24,11 @@
       "cache": true
     },
     "lint": {
-      "inputs": ["default", "{workspaceRoot}/eslint.config.mjs"],
+      "inputs": ["default", "{workspaceRoot}/eslint.config.js"],
       "cache": true
     },
     "typecheck": {
+      "dependsOn": ["^build"],
       "inputs": ["default", "{workspaceRoot}/tsconfig.base.json"],
       "cache": true
     }

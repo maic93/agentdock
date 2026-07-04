@@ -101,4 +101,16 @@ export default tseslint.config(
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
+  {
+    // Every package's vitest.config.ts intentionally reaches into the
+    // workspace-root vitest.config.base.ts by relative path, mirroring how
+    // every tsconfig.json already extends ../../../tsconfig.base.json. This
+    // is a shared build-tooling convention, not a dependency between
+    // packages, so it's exempted from the boundary rule rather than
+    // reported as a violation.
+    files: ["**/vitest.config.ts"],
+    rules: {
+      "@nx/enforce-module-boundaries": "off",
+    },
+  },
 );

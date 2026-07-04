@@ -1,0 +1,35 @@
+{
+  "name": "@agentdock/foundation-db",
+  "version": "0.1.0",
+  "description": "Persistence abstraction for control-plane data, starting with an in-memory ExecutionStore.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "nx": {
+    "tags": [
+      "scope:foundation"
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.spec.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@agentdock/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "vitest": "4.1.9"
+  }
+}

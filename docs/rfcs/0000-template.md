@@ -31,7 +31,7 @@ What other designs were considered, and why is this one preferred?
 
 ## Impact on existing code and dependency rules
 
-Does this require changes to `eslint.config.mjs` boundary constraints? Does
+Does this require changes to `eslint.config.js` boundary constraints? Does
 it introduce a new package, and if so under which layer (`kernel/`,
 `foundation/`, `shared/`, etc.) per the repository blueprint?
 

@@ -31,7 +31,8 @@ internal implementation details) don't need one.
 
 ## Index
 
-| ADR                                             | Title                                                  | Status   |
-| ----------------------------------------------- | ------------------------------------------------------ | -------- |
-| [0001](./0001-record-architecture-decisions.md) | Record architecture decisions as ADRs                  | Accepted |
-| [0002](./0002-node-version-policy.md)           | Standardize on Node.js 24 (Active LTS), not Node.js 20 | Accepted |
+| ADR                                                        | Title                                                                       | Status   |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- | -------- |
+| [0001](./0001-record-architecture-decisions.md)            | Record architecture decisions as ADRs                                       | Accepted |
+| [0002](./0002-node-version-policy.md)                      | Standardize on Node.js 24 (Active LTS), not Node.js 20                      | Accepted |
+| [0003](./0003-vitest-and-cross-package-type-resolution.md) | Vitest as the test runner; cross-package types resolve through built output | Accepted |

@@ -5,7 +5,7 @@ Shared build/lint/tsconfig configuration, not runtime code.
 ## Current status
 
 Empty for now. The repository's shared ESLint config
-([eslint.config.mjs](../eslint.config.mjs)) and shared TypeScript config
+([eslint.config.js](../eslint.config.js)) and shared TypeScript config
 ([tsconfig.base.json](../tsconfig.base.json)) currently live at the
 workspace root rather than as separate `tooling/*` packages, because a
 single root config is sufficient while there is exactly one flavor of

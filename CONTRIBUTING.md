@@ -96,7 +96,7 @@ for why this project uses Changesets rather than a single repo-wide version.
 
 The linter and Prettier config are the source of truth, not this document —
 if you disagree with a formatting rule, propose a change to
-[eslint.config.mjs](./eslint.config.mjs) or [.prettierrc.json](./.prettierrc.json)
+[eslint.config.js](./eslint.config.js) or [.prettierrc.json](./.prettierrc.json)
 via RFC rather than working around it locally.
 
 ## Building a plugin

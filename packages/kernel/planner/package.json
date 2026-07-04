@@ -1,0 +1,35 @@
+{
+  "name": "@agentdock/kernel-planner",
+  "version": "0.1.0",
+  "description": "Converts a Goal into an ExecutionGraph via intent analysis, capability resolution, and planning.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "nx": {
+    "tags": [
+      "scope:kernel"
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.spec.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@agentdock/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "vitest": "4.1.9"
+  }
+}

@@ -5,7 +5,14 @@ tasks with declared capability requirements and dependencies). This is
 intent classification and decomposition only — the Planner never executes
 anything.
 
-**Public API (once implemented):** `planGoal(goal, context) -> TaskGraph`.
+**Public API (implemented):** `Planner.plan(execution: Execution): Execution`
+— drives an Execution through `Analyzing` and `Planning`, returning it in
+the `Routing` status (or `Failed`, with an `UNPLANNABLE_GOAL` error, if no
+capability satisfies the resolved intent). Also exports `IntentAnalyzer` /
+`KeywordIntentAnalyzer` / `CompositeIntentAnalyzer` and
+`CapabilityResolver` / `StaticCapabilityResolver` as the extension points
+the Planner is built from — see
+[docs/architecture/003-execution-domain.md](../../../docs/architecture/003-execution-domain.md).
 
 **May depend on:** `@agentdock/shared-types`,
 `@agentdock/foundation-knowledge-base` (read-only), `@agentdock/provider-abstraction`
@@ -16,8 +23,8 @@ anything.
 `apps/*` package.
 
 **Must remain internal:** decomposition heuristics/prompt strategies —
-only the `TaskGraph` output shape is a public contract.
+only the `TaskGraph`/`ExecutionGraph` output shape is a public contract.
 
-**Status:** Not implemented. This README documents the approved design
-(see `docs/architecture/002-repository-foundation.md`, Section 3) so the
-package's boundaries are established before any code is written.
+**Status:** Implemented (first vertical slice: keyword-based intent
+analysis for the "conversation" intent, static capability resolution to
+`text-generation`, and single/multi-node graph construction).
