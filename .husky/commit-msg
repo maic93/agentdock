@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Enforces Conventional Commits on every commit message.
+# See commitlint.config.cjs and CONTRIBUTING.md for the accepted format.
+npx --no-install commitlint --edit "$1"

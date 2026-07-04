@@ -1,0 +1,99 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref to save CI minutes on rapid pushes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NX_CLOUD_DISTRIBUTED_EXECUTION: false
+
+jobs:
+  verify:
+    name: Lint, typecheck, and test (affected)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Full history is required for Nx's `affected` commands to diff
+          # correctly against the base branch.
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Enable Corepack (pnpm)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Derive Nx SHAs for affected commands
+        uses: nrwl/nx-set-shas@v4
+
+      - name: Lint (includes dependency-boundary enforcement)
+        run: pnpm exec nx affected --target=lint --parallel=3
+
+      - name: Typecheck
+        run: pnpm exec nx affected --target=typecheck --parallel=3
+
+      - name: Test
+        run: pnpm exec nx affected --target=test --parallel=3
+
+      - name: Check formatting
+        run: pnpm format:check
+
+  changeset-check:
+    name: Changeset present for publishable changes
+    runs-on: ubuntu-latest
+    # Only meaningful once publishable packages exist; kept as a no-op-safe
+    # step now so the workflow is correct from day one rather than added
+    # later as an afterthought.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Enable Corepack (pnpm)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify changeset exists for changed publishable packages
+        run: pnpm exec changeset status --since=origin/main
+
+  security-scan:
+    name: Dependency vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Enable Corepack (pnpm)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies
+        run: pnpm audit --audit-level=high

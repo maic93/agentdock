@@ -1,0 +1,16 @@
+# Normalize line endings across contributor platforms (Windows/macOS/Linux
+# parity is a stated cross-platform requirement of the project).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+
+# Generated files should not count toward PR diff review noise or language
+# statistics.
+pnpm-lock.yaml -diff linguist-generated=true
+CHANGELOG.md linguist-generated=true

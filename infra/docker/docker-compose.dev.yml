@@ -1,0 +1,36 @@
+# Development-only Docker Compose skeleton.
+#
+# Deliberately empty of services: per the approved architecture, this
+# repository does not yet implement foundation services (db, memory,
+# scheduler, etc.), so there is nothing real to containerize yet. Adding a
+# placeholder "postgres" service with no consumer would be exactly the kind
+# of fake scaffolding the project rules for this phase prohibit.
+#
+# What this file DOES provide now: the shared network and volume namespace
+# that future service definitions will attach to, so that "docker compose
+# up" becomes additive (new services get appended here) rather than
+# requiring contributors to invent this wiring themselves later.
+#
+# When packages/foundation/db is implemented, its service definition should
+# be added here as:
+#
+#   services:
+#     postgres:
+#       image: postgres:16-alpine
+#       networks: [agentdock_dev]
+#       volumes: [agentdock_db_data:/var/lib/postgresql/data]
+#       environment:
+#         POSTGRES_DB: agentdock
+#       ports: ["5432:5432"]
+#
+# ...at which point this comment block should be deleted, not left as a TODO.
+
+name: agentdock-dev
+
+networks:
+  agentdock_dev:
+    name: ${AGENTDOCK_DEV_NETWORK_NAME:-agentdock_dev}
+
+volumes:
+  agentdock_db_data:
+  agentdock_object_storage:

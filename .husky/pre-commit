@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Runs fast, staged-file-scoped checks before every commit.
+# Full lint/typecheck/test runs happen in CI (.github/workflows/ci.yml) —
+# this hook is deliberately kept fast so it doesn't discourage committing.
+npx --no-install lint-staged
