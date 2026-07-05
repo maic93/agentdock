@@ -5,7 +5,7 @@
 **Please do not open a public GitHub issue for security vulnerabilities.**
 
 Report privately via GitHub's
-[private vulnerability reporting](https://github.com/agentdock/agentdock/security/advisories/new)
+[private vulnerability reporting](https://github.com/maic93/agentdock/security/advisories/new)
 feature on this repository. If that's unavailable to you, email
 `security@agentdock.dev`.
 

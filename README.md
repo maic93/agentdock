@@ -26,7 +26,7 @@ You need [Ollama](https://ollama.com) installed and a model pulled.
 ollama pull llama3.2
 
 # 2. Clone and set up AgentDock
-git clone https://github.com/agentdock/agentdock.git
+git clone https://github.com/maic93/agentdock.git
 cd agentdock
 cp .env.example .env
 pnpm install

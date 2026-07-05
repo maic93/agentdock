@@ -19,7 +19,7 @@ can't I just do X" questions are answered there.
 ## Setup
 
 ```bash
-git clone https://github.com/<your-fork>/agentdock.git
+git clone https://github.com/maic93/agentdock.git
 cd agentdock
 cp .env.example .env
 pnpm install
