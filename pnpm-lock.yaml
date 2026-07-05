@@ -70,8 +70,73 @@ importers:
         specifier: 4.1.9
         version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
 
+  apps/api:
+    dependencies:
+      '@agentdock/foundation-config':
+        specifier: workspace:*
+        version: link:../../packages/foundation/config
+      '@agentdock/foundation-db':
+        specifier: workspace:*
+        version: link:../../packages/foundation/db
+      '@agentdock/kernel-ai-router':
+        specifier: workspace:*
+        version: link:../../packages/kernel/ai-router
+      '@agentdock/kernel-planner':
+        specifier: workspace:*
+        version: link:../../packages/kernel/planner
+      '@agentdock/kernel-workflow-engine':
+        specifier: workspace:*
+        version: link:../../packages/kernel/workflow-engine
+      '@agentdock/plugin-provider-ollama':
+        specifier: workspace:*
+        version: link:../../plugins/provider-ollama
+      '@agentdock/provider-abstraction':
+        specifier: workspace:*
+        version: link:../../packages/providers/provider-abstraction
+      '@agentdock/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared/types
+    devDependencies:
+      '@types/node':
+        specifier: 24.13.2
+        version: 24.13.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
+
+  packages/foundation/config:
+    devDependencies:
+      '@types/node':
+        specifier: 24.13.2
+        version: 24.13.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
+
   packages/foundation/db:
     dependencies:
+      '@agentdock/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+    devDependencies:
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
+
+  packages/kernel/ai-router:
+    dependencies:
+      '@agentdock/provider-abstraction':
+        specifier: workspace:*
+        version: link:../../providers/provider-abstraction
       '@agentdock/shared-types':
         specifier: workspace:*
         version: link:../../shared/types
@@ -96,7 +161,58 @@ importers:
         specifier: 4.1.9
         version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
 
+  packages/kernel/workflow-engine:
+    dependencies:
+      '@agentdock/kernel-ai-router':
+        specifier: workspace:*
+        version: link:../ai-router
+      '@agentdock/provider-abstraction':
+        specifier: workspace:*
+        version: link:../../providers/provider-abstraction
+      '@agentdock/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+    devDependencies:
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
+
+  packages/providers/provider-abstraction:
+    dependencies:
+      '@agentdock/shared-types':
+        specifier: workspace:*
+        version: link:../../shared/types
+    devDependencies:
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
+
   packages/shared/types:
+    devDependencies:
+      '@types/node':
+        specifier: 24.13.2
+        version: 24.13.2
+      typescript:
+        specifier: 5.6.3
+        version: 5.6.3
+      vitest:
+        specifier: 4.1.9
+        version: 4.1.9(@types/node@24.13.2)(vite@8.1.3(@types/node@24.13.2)(jiti@2.6.1)(yaml@2.9.0))
+
+  plugins/provider-ollama:
+    dependencies:
+      '@agentdock/provider-abstraction':
+        specifier: workspace:*
+        version: link:../../packages/providers/provider-abstraction
+      '@agentdock/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared/types
     devDependencies:
       '@types/node':
         specifier: 24.13.2

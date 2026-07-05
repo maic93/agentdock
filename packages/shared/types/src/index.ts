@@ -19,7 +19,11 @@ export {
   type ExecutionMetadata,
   touchMetadata,
 } from "./execution-metadata.js";
-export { createExecutionResult, type ExecutionResult } from "./execution-result.js";
+export {
+  type CreateExecutionResultOptions,
+  createExecutionResult,
+  type ExecutionResult,
+} from "./execution-result.js";
 export {
   assertTransition,
   canTransition,

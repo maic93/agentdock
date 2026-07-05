@@ -25,7 +25,9 @@ and likely a redirect to a separate repository.
 
 ## Status
 
-None of the reference plugins are implemented yet — they depend on
-`@agentdock/shared-sdk` and `@agentdock/provider-abstraction`, neither of
-which exist yet either. Each subdirectory below currently contains only a
-README stating this.
+`provider-ollama` is implemented (see
+[docs/architecture/004-execution-pipeline.md](../docs/architecture/004-execution-pipeline.md)).
+The remaining reference plugins (`provider-openai`, `provider-anthropic`,
+`tool-web-search`, `tool-filesystem`) are not implemented yet — they depend
+on `@agentdock/shared-sdk`, which doesn't exist yet either. Each of their
+subdirectories currently contains only a README stating this.

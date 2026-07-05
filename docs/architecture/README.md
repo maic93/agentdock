@@ -13,6 +13,11 @@ them:
    monorepo tooling choice (pnpm workspaces + Nx), the mechanically enforced
    dependency-boundary rules between those modules, naming standards, and
    governance model.
+3. **[003 — The Execution Domain](./003-execution-domain.md)** — the
+   `Execution` aggregate, its lifecycle, and the first Planner.
+4. **[004 — The End-to-End Execution Pipeline](./004-execution-pipeline.md)**
+   — connecting the Execution domain to a real provider (Ollama) through
+   the AI Router, the Executor, and a minimal HTTP API.
 
 ## Repository foundation
 

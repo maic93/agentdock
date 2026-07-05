@@ -19,7 +19,10 @@ calling it through a public interface.
 
 ## Current status
 
-No apps are implemented yet. Per the approved repository foundation, apps
-are scaffolded incrementally as the Phase 0 vertical slice (see
-`docs/architecture/001-system-architecture.md`, Section 24) is built — not
-stood up empty ahead of the kernel code they'd have nothing to call.
+`api` is implemented: `POST /execute`, `GET /executions/:id`, `GET
+/health`, plus the composition root that wires a real provider into the
+pipeline (see
+[docs/architecture/004-execution-pipeline.md](../docs/architecture/004-execution-pipeline.md)
+and [ADR 0004](../docs/adr/0004-apps-may-depend-on-plugins.md) for the one
+deliberate exception to "no business logic here": composition, which is
+wiring, not logic). `web` and `cli` are not implemented yet.

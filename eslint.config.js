@@ -50,6 +50,11 @@ export default tseslint.config(
                 "scope:foundation",
                 "scope:shared",
                 "scope:provider-abstraction",
+                // Composition-root exception (ADR 0004): until a real,
+                // dynamic Plugin System exists, an app is the one place
+                // allowed to import a concrete plugin directly, to wire it
+                // up. kernel/foundation/shared still never get this.
+                "type:plugin",
               ],
             },
             {
