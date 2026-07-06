@@ -1,5 +1,6 @@
-import type { ExecutionStore } from "@agentdock/foundation-db";
+import type { ExecutionStore, JobRepository } from "@agentdock/foundation-db";
 import type { Router } from "@agentdock/kernel-ai-router";
+import type { JobService } from "@agentdock/kernel-job-service";
 import type { Planner } from "@agentdock/kernel-planner";
 import type { Executor } from "@agentdock/kernel-workflow-engine";
 import type { Provider } from "@agentdock/provider-abstraction";
@@ -10,9 +11,17 @@ import type { Provider } from "@agentdock/provider-abstraction";
  * into {@link createServer} — route handlers receive this instead of
  * constructing their own collaborators, which is what makes them testable
  * with fakes instead of a real Ollama instance.
+ *
+ * `executionStore` and `jobRepository` are exposed directly (not only
+ * reachable through `jobService`) because the read-only routes — `GET
+ * /executions/:id`, `GET /jobs/:id`, `GET /jobs/:id/executions` — need to
+ * fetch already-persisted records without going through JobService, which
+ * only knows how to create and run a Job, not look one up.
  */
 export interface AppDependencies {
-  readonly store: ExecutionStore;
+  readonly executionStore: ExecutionStore;
+  readonly jobRepository: JobRepository;
+  readonly jobService: JobService;
   readonly planner: Planner;
   readonly router: Router;
   readonly executor: Executor;

@@ -16,7 +16,7 @@ export async function handleGetExecution(
   rawId: string,
 ): Promise<RouteResult> {
   try {
-    const execution = await deps.store.get(rawId as ExecutionId);
+    const execution = await deps.executionStore.get(rawId as ExecutionId);
     return { status: 200, body: serializeExecution(execution) };
   } catch (cause) {
     if (cause instanceof ExecutionNotFoundError) {

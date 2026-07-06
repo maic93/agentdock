@@ -12,11 +12,19 @@ import type { ExecutionResult } from "./execution-result.js";
 import { assertTransition, ExecutionStatus } from "./execution-status.js";
 import type { Goal } from "./goal.js";
 import type { Intent } from "./intent.js";
+import type { JobId } from "./job-id.js";
 
 export interface ExecutionProps {
   readonly id: ExecutionId;
   readonly goal: Goal;
   readonly status: ExecutionStatus;
+  /**
+   * The Job this Execution was created to satisfy, if any. Optional and
+   * additive (see docs/architecture/005-job-domain.md) — an Execution
+   * created directly via `create` (as every Execution was before the Job
+   * domain existed) has no owning Job, and that remains entirely valid.
+   */
+  readonly jobId?: JobId;
   readonly intent?: Intent;
   readonly capabilities?: readonly Capability[];
   readonly graph?: ExecutionGraph;
@@ -56,6 +64,23 @@ export class Execution {
   }
 
   /**
+   * Creates a new Execution owned by the given Job — used by
+   * {@link JobService} (see packages/kernel/job-service) rather than
+   * `create`, so that "this Execution belongs to a Job" is explicit at the
+   * call site instead of an easily-missed extra argument on the original
+   * factory. `create`'s signature is untouched by this addition.
+   */
+  static createForJob(jobId: JobId, goal: Goal, clock?: Clock): Execution {
+    return new Execution({
+      id: createExecutionId(),
+      jobId,
+      goal,
+      status: ExecutionStatus.Created,
+      metadata: createInitialMetadata(clock),
+    });
+  }
+
+  /**
    * Reconstructs an Execution from previously-recorded props — used by an
    * {@link ExecutionStore} implementation reading a persisted record back
    * into a domain object. Deliberately separate from `create` so that
@@ -68,6 +93,11 @@ export class Execution {
 
   get id(): ExecutionId {
     return this.props.id;
+  }
+
+  /** The Job this Execution belongs to, if it was created via {@link createForJob}. */
+  get jobId(): JobId | undefined {
+    return this.props.jobId;
   }
 
   get goal(): Goal {

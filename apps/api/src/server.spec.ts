@@ -46,6 +46,7 @@ describe("HTTP server (integration)", () => {
     expect(body.model).toBe("fake-model");
     expect(body.durationMs).toBeGreaterThanOrEqual(0);
     expect(body.executionId).toBeTruthy();
+    expect(response.headers.get("deprecation")).toBe("true");
   });
 
   it("makes the execution retrievable via GET /executions/:id afterward", async () => {
@@ -97,5 +98,109 @@ describe("HTTP server (integration)", () => {
   it("returns 404 for an unrecognized route", async () => {
     const response = await fetch(`${baseUrl}/nonexistent`);
     expect(response.status).toBe(404);
+  });
+
+  // Required by this milestone: POST /jobs -> Execution created ->
+  // Execution completed -> Job completed, verified end-to-end over real
+  // HTTP, not just at the JobService unit level (see
+  // packages/kernel/job-service/src/job-service.spec.ts for that).
+  it("POST /jobs creates a Job, runs a real Execution for it, and completes both", async () => {
+    const createResponse = await fetch(`${baseUrl}/jobs`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ goal: "Hello" }),
+    });
+    expect(createResponse.status).toBe(200);
+    const created = (await createResponse.json()) as {
+      jobId: string;
+      status: string;
+      executionId: string;
+      response: string;
+    };
+    expect(created.status).toBe("completed");
+    expect(created.response).toBe("Hello! How can I help you today?");
+    expect(created.jobId).toBeTruthy();
+    expect(created.executionId).toBeTruthy();
+
+    // The Execution this Job created is independently retrievable and
+    // itself completed, and knows which Job it belongs to.
+    const executionResponse = await fetch(`${baseUrl}/executions/${created.executionId}`);
+    expect(executionResponse.status).toBe(200);
+    const execution = (await executionResponse.json()) as { status: string; jobId: string };
+    expect(execution.status).toBe("completed");
+    expect(execution.jobId).toBe(created.jobId);
+
+    // The Job itself is independently retrievable and completed, and
+    // knows the Execution it created.
+    const jobResponse = await fetch(`${baseUrl}/jobs/${created.jobId}`);
+    expect(jobResponse.status).toBe(200);
+    const job = (await jobResponse.json()) as {
+      status: string;
+      executionIds: string[];
+      result: { summary: string };
+    };
+    expect(job.status).toBe("completed");
+    expect(job.executionIds).toEqual([created.executionId]);
+    expect(job.result.summary).toBe("Hello! How can I help you today?");
+  });
+
+  it("GET /jobs/:id/executions returns the Job's owned Execution", async () => {
+    const createResponse = await fetch(`${baseUrl}/jobs`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ goal: "Hello" }),
+    });
+    const created = (await createResponse.json()) as { jobId: string; executionId: string };
+
+    const response = await fetch(`${baseUrl}/jobs/${created.jobId}/executions`);
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { executions: Array<{ id: string }> };
+    expect(body.executions).toHaveLength(1);
+    expect(body.executions[0]?.id).toBe(created.executionId);
+  });
+
+  it("returns 404 for an unknown job id", async () => {
+    const response = await fetch(`${baseUrl}/jobs/does-not-exist`);
+    expect(response.status).toBe(404);
+  });
+
+  it("returns 404 for GET /jobs/:id/executions on an unknown job id", async () => {
+    const response = await fetch(`${baseUrl}/jobs/does-not-exist/executions`);
+    expect(response.status).toBe(404);
+  });
+
+  it("POST /jobs returns a 422 planning error for an unclassifiable goal", async () => {
+    const response = await fetch(`${baseUrl}/jobs`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ goal: "Reticulate the splines" }),
+    });
+    expect(response.status).toBe(422);
+    const body = (await response.json()) as { status: string; error: { category: string } };
+    expect(body.status).toBe("failed");
+    expect(body.error.category).toBe("planning");
+  });
+
+  it("POST /execute and POST /jobs against the same goal produce consistent, independently-retrievable records", async () => {
+    // Backward-compatibility check: the old and new endpoints are two
+    // faces of the same underlying JobService, so a client mixing both
+    // (e.g. during a migration) sees one consistent Execution/Job model,
+    // not two divergent implementations.
+    const executeResponse = await fetch(`${baseUrl}/execute`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ goal: "Hello" }),
+    });
+    const executed = (await executeResponse.json()) as { executionId: string };
+
+    const executionViaOldRoute = await fetch(`${baseUrl}/executions/${executed.executionId}`);
+    const executionBody = (await executionViaOldRoute.json()) as { jobId: string };
+    expect(executionBody.jobId).toBeTruthy();
+
+    const jobViaNewRoute = await fetch(`${baseUrl}/jobs/${executionBody.jobId}`);
+    expect(jobViaNewRoute.status).toBe(200);
+    const job = (await jobViaNewRoute.json()) as { executionIds: string[] };
+    expect(job.executionIds).toEqual([executed.executionId]);
   });
 });

@@ -7,15 +7,16 @@ the result — without you choosing a model, a search engine, or a provider.
 
 ## Status
 
-Early, working, and narrow. As of this milestone, AgentDock can take a real
-HTTP request, plan it, run it against a real locally-running Ollama model,
-and return the result — for exactly one scenario: a conversational goal
-routed to text generation. See
-[docs/architecture/004-execution-pipeline.md](./docs/architecture/004-execution-pipeline.md)
-for what that pipeline actually does, and Known Limitations below for the
-short version. There's no auth, no multi-provider routing, no plugin
-system, and no UI yet — what exists is a real, tested, end-to-end vertical
-slice that every future feature builds on top of.
+Early, working, and narrow. AgentDock can take a real HTTP request, turn it
+into a `Job`, plan and run one `Execution` for it against a real
+locally-running Ollama model, and return the result — for exactly one
+scenario: a conversational goal routed to text generation. See
+[docs/architecture/005-job-domain.md](./docs/architecture/005-job-domain.md)
+for what `Job` and `Execution` each are and why they're separate, and Known
+Limitations below for the short version. There's no auth, no
+multi-Execution planning, no plugin system, and no UI yet — what exists is
+a real, tested, end-to-end vertical slice that every future feature builds
+on top of.
 
 ## Quick Start
 
@@ -40,7 +41,7 @@ node apps/api/dist/main.js
 In another terminal:
 
 ```bash
-curl -X POST http://localhost:3000/execute \
+curl -X POST http://localhost:3000/jobs \
   -H "content-type: application/json" \
   -d '{"goal": "Hello"}'
 ```
@@ -81,19 +82,17 @@ rather than failing confusingly on the first request:
 **A successful request:**
 
 ```bash
-curl -X POST http://localhost:3000/execute \
+curl -X POST http://localhost:3000/jobs \
   -H "content-type: application/json" \
   -d '{"goal": "Hello"}'
 ```
 
 ```json
 {
-  "executionId": "3fa2e1c0-...",
+  "jobId": "8f2b1a90-...",
   "status": "completed",
-  "response": "Hello! How can I help you today?",
-  "provider": "ollama",
-  "model": "llama3.2",
-  "durationMs": 842
+  "executionId": "3fa2e1c0-...",
+  "response": "Hello! How can I help you today?"
 }
 ```
 
@@ -101,14 +100,14 @@ curl -X POST http://localhost:3000/execute \
 capability today — see Known Limitations):
 
 ```bash
-curl -X POST http://localhost:3000/execute \
+curl -X POST http://localhost:3000/jobs \
   -H "content-type: application/json" \
   -d '{"goal": "Build me a web application"}'
 ```
 
 ```json
 {
-  "executionId": "9c1a4b2d-...",
+  "jobId": "9c1a4b2d-...",
   "status": "failed",
   "error": {
     "category": "planning",
@@ -123,7 +122,7 @@ _(HTTP 422)_
 
 ```json
 {
-  "executionId": "...",
+  "jobId": "...",
   "status": "failed",
   "error": {
     "category": "routing",
@@ -134,45 +133,75 @@ _(HTTP 422)_
 
 _(HTTP 502)_
 
-**Retrieving a stored execution:**
+**Retrieving a Job:**
 
 ```bash
-curl http://localhost:3000/executions/3fa2e1c0-...
+curl http://localhost:3000/jobs/8f2b1a90-...
 ```
 
 ```json
 {
-  "id": "3fa2e1c0-...",
+  "id": "8f2b1a90-...",
   "goal": { "text": "Hello" },
   "status": "completed",
-  "intent": {
-    "category": "conversation",
-    "confidence": 0.7,
-    "reasoning": "Matched conversational keyword(s): hello."
-  },
-  "capabilities": ["text-generation"],
-  "graph": {
-    "nodes": [
-      {
-        "id": "...",
-        "objective": "Hello",
-        "capability": "text-generation",
-        "dependencies": [],
-        "status": "pending"
-      }
-    ]
-  },
+  "priority": "normal",
+  "executionIds": ["3fa2e1c0-..."],
   "result": {
     "summary": "Hello! How can I help you today?",
     "provider": "ollama",
-    "model": "llama3.2",
-    "durationMs": 842
+    "model": "llama3.2"
   },
-  "metadata": { "createdAt": "2026-07-05T12:00:00.000Z", "updatedAt": "2026-07-05T12:00:00.842Z" }
+  "metadata": { "createdAt": "2026-07-06T12:00:00.000Z", "updatedAt": "2026-07-06T12:00:00.842Z" }
 }
 ```
 
-**Unknown execution id** returns HTTP 404 with
+**The Job's Execution(s):**
+
+```bash
+curl http://localhost:3000/jobs/8f2b1a90-.../executions
+```
+
+```json
+{
+  "executions": [
+    {
+      "id": "3fa2e1c0-...",
+      "jobId": "8f2b1a90-...",
+      "goal": { "text": "Hello" },
+      "status": "completed",
+      "intent": {
+        "category": "conversation",
+        "confidence": 0.7,
+        "reasoning": "Matched conversational keyword(s): hello."
+      },
+      "capabilities": ["text-generation"],
+      "graph": {
+        "nodes": [
+          {
+            "id": "...",
+            "objective": "Hello",
+            "capability": "text-generation",
+            "dependencies": [],
+            "status": "pending"
+          }
+        ]
+      },
+      "result": {
+        "summary": "Hello! How can I help you today?",
+        "provider": "ollama",
+        "model": "llama3.2",
+        "durationMs": 842
+      },
+      "metadata": {
+        "createdAt": "2026-07-06T12:00:00.000Z",
+        "updatedAt": "2026-07-06T12:00:00.842Z"
+      }
+    }
+  ]
+}
+```
+
+**Unknown job or execution id** returns HTTP 404 with
 `{"error": {"category": "not_found", "message": "..."}}`.
 
 **Health check:**
@@ -194,40 +223,97 @@ curl http://localhost:3000/health
 }
 ```
 
-## Architecture of the Execution Pipeline
+### `POST /execute` (deprecated)
+
+Still works, unchanged request/response shape, now implemented by
+delegating to the same `JobService` that powers `/jobs` internally.
+Responses carry a `Deprecation: true` header. New integrations should use
+`POST /jobs` instead.
+
+```bash
+curl -X POST http://localhost:3000/execute \
+  -H "content-type: application/json" \
+  -d '{"goal": "Hello"}'
+```
+
+```json
+{
+  "executionId": "3fa2e1c0-...",
+  "status": "completed",
+  "response": "Hello! How can I help you today?",
+  "provider": "ollama",
+  "model": "llama3.2",
+  "durationMs": 842
+}
+```
+
+## Job vs. Execution vs. ExecutionGraph vs. ExecutionNode
+
+- **Job** — the user's requested _outcome_ ("Hello", eventually things like
+  "build a SaaS"). Has its own lifecycle (Created → Planning → Executing →
+  Completed/Failed) and owns one or more Executions.
+- **Execution** — one _unit of work_ created to help satisfy a Job. Has its
+  own, more granular lifecycle (Created → Analyzing → Planning → Routing →
+  Executing → Completed/Failed) and belongs to exactly one Job.
+- **ExecutionGraph** — the validated plan _for one Execution_: an acyclic
+  set of nodes, produced once that Execution's Planning stage completes.
+- **ExecutionNode** — one step within that plan: one capability, run
+  against one provider.
+
+Today, every Job creates exactly one Execution, whose graph always has
+exactly one node — so these four concepts collapse to a 1:1:1:1
+relationship in practice. They're modeled as four separate types anyway,
+because a Job that eventually needs several Executions (each with their
+own multi-node graphs) shouldn't require re-modeling any of this — see
+[docs/architecture/005-job-domain.md](./docs/architecture/005-job-domain.md)
+for the full reasoning and sequence diagrams.
+
+## Architecture of the Pipeline
 
 ```
-POST /execute {"goal": "Hello"}
+POST /jobs {"goal": "Hello"}
         v
-Execution.create(goal)              [Created]
+Job.create(goal)                    [Created]
+        v
+job.startPlanning()                 [Planning]
+        v
+Execution.createForJob(job.id, ...) [Created]
         v
 planner.plan(execution)             [Analyzing -> Planning -> Routing, or -> Failed]
+        v
+job.beginExecution(execution.id)    [Executing]
         v
 executor.execute(planned)           [-> Executing -> Completed, or -> Failed]
         v (via the Router, selecting a healthy provider by capability)
 provider.execute(...)               [a real HTTP call to Ollama]
         v
-200 { executionId, status, response, provider, model, durationMs }
+job.complete(jobResult)              [Completed]
+        v
+200 { jobId, status, executionId, response }
 ```
 
-Every stage is persisted to the `ExecutionStore` as it completes. Full
-design rationale — why each package owns the piece it owns, why the
-Executor never throws, why `apps/api` is allowed to import a concrete
-plugin — is in
-[docs/architecture/004-execution-pipeline.md](./docs/architecture/004-execution-pipeline.md).
+Every stage is persisted (to the `JobRepository` and the `ExecutionStore`)
+as it completes. Full design rationale — why Job and Execution are
+separate, why `JobService` orchestrates rather than replaces the existing
+Planner and Executor, why `POST /execute` still works — is in
+[docs/architecture/005-job-domain.md](./docs/architecture/005-job-domain.md)
+(building on
+[004 — The End-to-End Execution Pipeline](./docs/architecture/004-execution-pipeline.md)).
 
 ## Known Limitations
 
+- **One Execution per Job, always.** There is no multi-Execution planning
+  yet — every Job creates exactly one Execution.
 - **One provider, one capability.** Only Ollama, only `text-generation`,
   only conversational goals resolve to it. Anything else fails planning
   with a 422.
-- **Single-node graphs only, in practice.** The Executor can run a real
-  multi-node DAG, but nothing produces one yet.
-- **No streaming.** `POST /execute` blocks until Ollama's full response is
-  ready.
-- **No auth, no persistence across restarts, no plugin system yet.** The
-  Execution store is in-memory; the Ollama provider is wired in by a
-  composition root, not discovered dynamically (see
+- **No Artifact model.** Referenced in the long-term architecture, not yet
+  implemented.
+- **No streaming.** Both `POST /jobs` and `POST /execute` block until
+  Ollama's full response is ready.
+- **No auth, no persistence across restarts, no plugin system yet.** Both
+  stores are in-memory; the Ollama provider is wired in by a composition
+  root, not discovered dynamically (see
   [ADR 0004](./docs/adr/0004-apps-may-depend-on-plugins.md)).
 
 ## Repository layout
@@ -264,7 +350,9 @@ restated, from this README:
 - [003 — The Execution Domain](./docs/architecture/003-execution-domain.md)
   — the `Execution` aggregate and its lifecycle.
 - [004 — The End-to-End Execution Pipeline](./docs/architecture/004-execution-pipeline.md)
-  — this milestone.
+  — connecting Execution to a real provider (Ollama).
+- [005 — The Job Domain](./docs/architecture/005-job-domain.md) — this
+  milestone.
 
 ## Contributing
 

@@ -1,5 +1,6 @@
-import { InMemoryExecutionStore } from "@agentdock/foundation-db";
+import { InMemoryExecutionStore, InMemoryJobRepository } from "@agentdock/foundation-db";
 import { CapabilityMatchingRouter } from "@agentdock/kernel-ai-router";
+import { JobService } from "@agentdock/kernel-job-service";
 import {
   CompositeIntentAnalyzer,
   KeywordIntentAnalyzer,
@@ -60,7 +61,17 @@ export function buildTestDependencies(provider: Provider = new FakeProvider()): 
   });
   const router = new CapabilityMatchingRouter([provider]);
   const executor = new Executor(router);
-  const store = new InMemoryExecutionStore();
+  const executionStore = new InMemoryExecutionStore();
+  const jobRepository = new InMemoryJobRepository();
+  const jobService = new JobService({ jobRepository, executionStore, planner, executor });
 
-  return { store, planner, router, executor, ollamaProvider: provider };
+  return {
+    executionStore,
+    jobRepository,
+    jobService,
+    planner,
+    router,
+    executor,
+    ollamaProvider: provider,
+  };
 }

@@ -1,6 +1,7 @@
 import type { AppConfig } from "@agentdock/foundation-config";
-import { InMemoryExecutionStore } from "@agentdock/foundation-db";
+import { InMemoryExecutionStore, InMemoryJobRepository } from "@agentdock/foundation-db";
 import { CapabilityMatchingRouter } from "@agentdock/kernel-ai-router";
+import { JobService } from "@agentdock/kernel-job-service";
 import {
   CompositeIntentAnalyzer,
   KeywordIntentAnalyzer,
@@ -33,7 +34,18 @@ export function buildDependencies(config: AppConfig): AppDependencies {
 
   const router = new CapabilityMatchingRouter([ollamaProvider]);
   const executor = new Executor(router);
-  const store = new InMemoryExecutionStore();
+  const executionStore = new InMemoryExecutionStore();
+  const jobRepository = new InMemoryJobRepository();
 
-  return { store, planner, router, executor, ollamaProvider };
+  const jobService = new JobService({ jobRepository, executionStore, planner, executor });
+
+  return {
+    executionStore,
+    jobRepository,
+    jobService,
+    planner,
+    router,
+    executor,
+    ollamaProvider,
+  };
 }
