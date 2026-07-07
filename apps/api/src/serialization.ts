@@ -1,4 +1,4 @@
-import type { Execution } from "@agentdock/shared-types";
+import type { Execution, Job } from "@agentdock/shared-types";
 
 /**
  * Converts a domain {@link Execution} into a plain, JSON-safe object for
@@ -15,6 +15,7 @@ import type { Execution } from "@agentdock/shared-types";
 export function serializeExecution(execution: Execution): Record<string, unknown> {
   return {
     id: execution.id,
+    jobId: execution.jobId,
     goal: execution.goal,
     status: execution.status,
     intent: execution.intent,
@@ -27,6 +28,27 @@ export function serializeExecution(execution: Execution): Record<string, unknown
     metadata: {
       createdAt: execution.metadata.createdAt.toISOString(),
       updatedAt: execution.metadata.updatedAt.toISOString(),
+    },
+  };
+}
+
+/**
+ * Converts a domain {@link Job} into a plain, JSON-safe object for an API
+ * response, mirroring {@link serializeExecution}'s shape and reasoning
+ * exactly (same `error.cause` omission, same ISO-string timestamps).
+ */
+export function serializeJob(job: Job): Record<string, unknown> {
+  return {
+    id: job.id,
+    goal: job.goal,
+    status: job.status,
+    priority: job.priority,
+    executionIds: job.executionIds,
+    result: job.result,
+    error: job.error ? { message: job.error.message, code: job.error.code } : undefined,
+    metadata: {
+      createdAt: job.metadata.createdAt.toISOString(),
+      updatedAt: job.metadata.updatedAt.toISOString(),
     },
   };
 }

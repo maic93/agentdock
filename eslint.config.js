@@ -63,6 +63,11 @@ export default tseslint.config(
                 "scope:kernel",
                 "scope:shared",
                 "scope:provider-abstraction",
+                // Closes a latent gap (ADR 0005): 002-repository-foundation.md,
+                // Section 3 already approved kernel-workflow-engine depending
+                // on foundation-artifact-manager/foundation-db; this rule had
+                // just never been updated to actually allow it.
+                "scope:foundation",
               ],
             },
             {

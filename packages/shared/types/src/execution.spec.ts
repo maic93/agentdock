@@ -7,6 +7,7 @@ import type { Intent } from "./intent.js";
 import { ExecutionGraph, ExecutionNodeStatus, createExecutionNodeId } from "./execution-graph.js";
 import { createExecutionResult } from "./execution-result.js";
 import { createExecutionError } from "./execution-error.js";
+import type { JobId } from "./job-id.js";
 
 const FIXED_TIME_1 = new Date("2026-01-01T00:00:00.000Z");
 const FIXED_TIME_2 = new Date("2026-01-01T00:00:01.000Z");
@@ -187,5 +188,29 @@ describe("Execution.fromProps / toProps round-trip", () => {
     expect(rehydrated.status).toBe(original.status);
     expect(rehydrated.goal).toEqual(original.goal);
     expect(rehydrated.metadata).toEqual(original.metadata);
+  });
+});
+
+describe("Execution.createForJob", () => {
+  it("creates an Execution owned by the given Job, starting in Created", () => {
+    const jobId = "11111111-1111-4111-8111-111111111111" as JobId;
+    const execution = Execution.createForJob(jobId, createGoal("Hello"));
+
+    expect(execution.jobId).toBe(jobId);
+    expect(execution.status).toBe(ExecutionStatus.Created);
+  });
+
+  it("assigns a unique Execution id independent of the Job id", () => {
+    const jobId = "11111111-1111-4111-8111-111111111111" as JobId;
+    const execution = Execution.createForJob(jobId, createGoal("Hello"));
+
+    expect(execution.id).not.toBe(jobId);
+  });
+});
+
+describe("Execution.create leaves jobId unset", () => {
+  it("has no jobId when created via the original factory", () => {
+    const execution = Execution.create(createGoal("Hello"));
+    expect(execution.jobId).toBeUndefined();
   });
 });

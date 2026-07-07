@@ -10,14 +10,17 @@ import type { RouteResult } from "./route-result.js";
 import { handleExecute } from "./routes/execute.js";
 import { handleGetExecution } from "./routes/get-execution.js";
 import { handleHealth } from "./routes/health.js";
+import { handleCreateJob, handleGetJob, handleGetJobExecutions } from "./routes/jobs.js";
 
 const EXECUTION_PATH_PATTERN = /^\/executions\/([^/]+)$/;
+const JOB_PATH_PATTERN = /^\/jobs\/([^/]+)$/;
+const JOB_EXECUTIONS_PATH_PATTERN = /^\/jobs\/([^/]+)\/executions$/;
 
 /**
  * Builds the HTTP server. Uses `node:http` directly rather than a
- * framework: three routes don't need one, and avoiding the dependency
- * avoids a whole category of version-compatibility risk for no real
- * benefit at this scope (see ADR 0004).
+ * framework: routes don't need one, and avoiding the dependency avoids a
+ * whole category of version-compatibility risk for no real benefit at
+ * this scope (see ADR 0004).
  */
 export function createServer(deps: AppDependencies): Server {
   return createHttpServer((req, res) => {
@@ -48,10 +51,43 @@ async function dispatch(
       sendJson(res, {
         status: statusCodeForCategory("validation"),
         body: errorBody("validation", "Request body must be valid JSON."),
+        headers: { Deprecation: "true" },
       });
       return;
     }
     sendJson(res, await handleExecute(deps, body));
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/jobs") {
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, {
+        status: statusCodeForCategory("validation"),
+        body: errorBody("validation", "Request body must be valid JSON."),
+      });
+      return;
+    }
+    sendJson(res, await handleCreateJob(deps, body));
+    return;
+  }
+
+  // Most specific pattern first: /jobs/:id/executions before /jobs/:id,
+  // since the latter's regex would otherwise never get a chance to not
+  // match the former (both start with /jobs/).
+  const jobExecutionsMatch = JOB_EXECUTIONS_PATH_PATTERN.exec(url.pathname);
+  if (req.method === "GET" && jobExecutionsMatch) {
+    const rawId = decodeURIComponent(jobExecutionsMatch[1] ?? "");
+    sendJson(res, await handleGetJobExecutions(deps, rawId));
+    return;
+  }
+
+  const jobMatch = JOB_PATH_PATTERN.exec(url.pathname);
+  if (req.method === "GET" && jobMatch) {
+    const rawId = decodeURIComponent(jobMatch[1] ?? "");
+    sendJson(res, await handleGetJob(deps, rawId));
     return;
   }
 
@@ -75,7 +111,10 @@ async function dispatch(
 
 function sendJson(res: ServerResponse, result: RouteResult): void {
   const payload = JSON.stringify(result.body);
-  res.writeHead(result.status, { "content-type": "application/json; charset=utf-8" });
+  res.writeHead(result.status, {
+    "content-type": "application/json; charset=utf-8",
+    ...result.headers,
+  });
   res.end(payload);
 }
 

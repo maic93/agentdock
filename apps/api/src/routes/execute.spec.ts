@@ -25,7 +25,7 @@ describe("handleExecute", () => {
     const result = await handleExecute(deps, { goal: "Hello" });
     const executionId = (result.body as { executionId: string }).executionId;
 
-    const stored = await deps.store.get(executionId as ExecutionId);
+    const stored = await deps.executionStore.get(executionId as ExecutionId);
     expect(stored.status).toBe("completed");
   });
 

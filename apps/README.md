@@ -19,10 +19,11 @@ calling it through a public interface.
 
 ## Current status
 
-`api` is implemented: `POST /execute`, `GET /executions/:id`, `GET
-/health`, plus the composition root that wires a real provider into the
-pipeline (see
-[docs/architecture/004-execution-pipeline.md](../docs/architecture/004-execution-pipeline.md)
+`api` is implemented: `POST /jobs`, `GET /jobs/:id`, `GET
+/jobs/:id/executions`, `GET /executions/:id`, `GET /health`, and the
+deprecated-but-still-working `POST /execute`, plus the composition root
+that wires a real provider into the pipeline (see
+[docs/architecture/005-job-domain.md](../docs/architecture/005-job-domain.md)
 and [ADR 0004](../docs/adr/0004-apps-may-depend-on-plugins.md) for the one
 deliberate exception to "no business logic here": composition, which is
 wiring, not logic). `web` and `cli` are not implemented yet.

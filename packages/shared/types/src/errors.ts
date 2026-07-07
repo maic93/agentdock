@@ -1,4 +1,5 @@
 import type { ExecutionStatus } from "./execution-status.js";
+import type { JobStatus } from "./job-status.js";
 
 /**
  * Thrown when constructing a {@link Goal} from invalid input (see goal.ts).
@@ -36,5 +37,21 @@ export class InvalidExecutionGraphError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "InvalidExecutionGraphError";
+  }
+}
+
+/**
+ * Thrown when a {@link Job} is asked to transition to a status that the
+ * Job lifecycle state model (see job-status.ts) does not allow from its
+ * current status. Mirrors {@link InvalidExecutionTransitionError} exactly,
+ * for the same reason: one centralized mechanism, not scattered checks.
+ */
+export class InvalidJobTransitionError extends Error {
+  constructor(
+    public readonly from: JobStatus,
+    public readonly to: JobStatus,
+  ) {
+    super(`Cannot transition Job from "${from}" to "${to}".`);
+    this.name = "InvalidJobTransitionError";
   }
 }

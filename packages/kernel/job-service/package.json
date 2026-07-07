@@ -1,0 +1,40 @@
+{
+  "name": "@agentdock/kernel-job-service",
+  "version": "0.1.0",
+  "description": "Orchestrates the Job domain on top of the existing Planner and Executor.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "nx": {
+    "tags": [
+      "scope:kernel"
+    ]
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.spec.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@agentdock/foundation-db": "workspace:*",
+    "@agentdock/kernel-planner": "workspace:*",
+    "@agentdock/kernel-workflow-engine": "workspace:*",
+    "@agentdock/shared-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@agentdock/kernel-ai-router": "workspace:*",
+    "@agentdock/provider-abstraction": "workspace:*",
+    "typescript": "5.6.3",
+    "vitest": "4.1.9"
+  }
+}

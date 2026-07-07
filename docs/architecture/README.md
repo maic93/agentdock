@@ -18,6 +18,9 @@ them:
 4. **[004 — The End-to-End Execution Pipeline](./004-execution-pipeline.md)**
    — connecting the Execution domain to a real provider (Ollama) through
    the AI Router, the Executor, and a minimal HTTP API.
+5. **[005 — The Job Domain](./005-job-domain.md)** — `Job` as an
+   orchestration layer above `Execution`, Execution ownership, and the new
+   `/jobs` API.
 
 ## Repository foundation
 

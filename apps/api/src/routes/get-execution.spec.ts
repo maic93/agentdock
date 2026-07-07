@@ -7,7 +7,7 @@ describe("handleGetExecution", () => {
   it("returns the serialized execution when it exists", async () => {
     const deps = buildTestDependencies();
     const execution = Execution.create(createGoal("Hello"));
-    await deps.store.create(execution);
+    await deps.executionStore.create(execution);
 
     const result = await handleGetExecution(deps, execution.id);
 
