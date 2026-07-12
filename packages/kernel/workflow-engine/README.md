@@ -7,17 +7,21 @@ to do.
 
 **Public API (implemented):** `Executor.execute(execution: Execution):
 Promise<Execution>` — requires an Execution in the `Routing` status (throws
-`InvalidExecutionStateError` otherwise), runs each node in
-`execution.graph` against a provider selected by the Router, and returns
-the Execution in `Completed` (with an `ExecutionResult` carrying the
-provider id, model, and duration) or `Failed` (with a categorized
-`ExecutionError` — `ROUTING_ERROR`, `PROVIDER_ERROR`, or
-`EXECUTION_FAILED`).
+`InvalidExecutionStateError` otherwise). For each node in
+`execution.graph`, selects a provider via the Router's diagnosable
+selection, builds a finished prompt via
+`@agentdock/kernel-prompt-builder` (a new, optional, defaulted
+constructor parameter as of milestone 007 — every existing caller is
+unaffected), and sends that composed prompt, not the raw goal text, to the
+provider. Returns the Execution in `Completed` (with an `ExecutionResult`
+carrying the provider id, model, duration, and routing diagnostics) or
+`Failed` (with a categorized `ExecutionError` — `ROUTING_ERROR`,
+`PROVIDER_ERROR`, or `EXECUTION_FAILED` — also carrying diagnostics).
 
 **May depend on:** `@agentdock/shared-types`, `@agentdock/kernel-ai-router`,
-`@agentdock/provider-abstraction`, `@agentdock/kernel-tool-registry`,
-`@agentdock/kernel-event-bus`, `@agentdock/foundation-artifact-manager`,
-`@agentdock/foundation-db`.
+`@agentdock/kernel-prompt-builder`, `@agentdock/provider-abstraction`,
+`@agentdock/kernel-tool-registry`, `@agentdock/kernel-event-bus`,
+`@agentdock/foundation-artifact-manager`, `@agentdock/foundation-db`.
 
 **Must never depend on:** `apps/*`, `plugins/*` directly (must resolve
 providers through `kernel-ai-router`), `kernel-planner` internals (only its

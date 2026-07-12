@@ -33,4 +33,16 @@ describe("createExecutionResult", () => {
       durationMs: 42,
     });
   });
+
+  it("includes diagnostics when given", () => {
+    const diagnostics = {
+      capability: "text-generation" as const,
+      selectedProviderId: "ollama",
+      scores: [],
+      reason: "only eligible provider",
+      selectionDurationMs: 3,
+    };
+    const result = createExecutionResult("Said hello back.", { diagnostics });
+    expect(result.diagnostics).toEqual(diagnostics);
+  });
 });

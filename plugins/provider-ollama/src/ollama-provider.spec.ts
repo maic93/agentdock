@@ -19,6 +19,14 @@ describe("OllamaProvider identity", () => {
     expect(provider.id).toBe("ollama");
     expect(provider.capabilities).toEqual(["text-generation"]);
   });
+
+  it("exposes metadata whose capabilities match the top-level capabilities", () => {
+    const provider = new OllamaProvider(CONFIG, vi.fn());
+    expect(provider.metadata.id).toBe(provider.id);
+    expect(provider.metadata.capabilities).toEqual(provider.capabilities);
+    expect(provider.metadata.providerType).toBe("local");
+    expect(provider.metadata.costTier).toBe("free");
+  });
 });
 
 describe("OllamaProvider.checkHealth", () => {

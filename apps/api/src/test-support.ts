@@ -1,5 +1,5 @@
 import { InMemoryExecutionStore, InMemoryJobRepository } from "@agentdock/foundation-db";
-import { CapabilityMatchingRouter } from "@agentdock/kernel-ai-router";
+import { ScoringRouter } from "@agentdock/kernel-ai-router";
 import { JobService } from "@agentdock/kernel-job-service";
 import {
   CompositeIntentAnalyzer,
@@ -7,6 +7,7 @@ import {
   Planner,
   StaticCapabilityResolver,
 } from "@agentdock/kernel-planner";
+import { ProviderRegistry } from "@agentdock/kernel-provider-registry";
 import { Executor } from "@agentdock/kernel-workflow-engine";
 import {
   createProviderId,
@@ -15,6 +16,7 @@ import {
   type ProviderExecuteResult,
   type ProviderHealth,
   type ProviderId,
+  type ProviderMetadata,
 } from "@agentdock/provider-abstraction";
 import type { Capability } from "@agentdock/shared-types";
 import type { AppDependencies } from "./dependencies.js";
@@ -33,6 +35,23 @@ import type { AppDependencies } from "./dependencies.js";
 export class FakeProvider implements Provider {
   readonly id: ProviderId = createProviderId("fake-provider");
   readonly capabilities: readonly Capability[] = ["text-generation"];
+  readonly metadata: ProviderMetadata = {
+    id: this.id,
+    displayName: "Fake Provider",
+    providerType: "local",
+    version: "0.0.0",
+    capabilities: this.capabilities,
+    supportsStreaming: false,
+    supportsVision: false,
+    supportsTools: false,
+    supportsJSON: false,
+    supportsFunctionCalling: false,
+    contextWindow: 4096,
+    maxOutputTokens: 1024,
+    priority: 100,
+    costTier: "free",
+    latencyTier: "medium",
+  };
 
   constructor(
     private readonly response = "Hello! How can I help?",
@@ -55,11 +74,14 @@ export class FakeProvider implements Provider {
 
 /** Builds a full AppDependencies graph backed by a {@link FakeProvider} instead of a real Ollama instance. */
 export function buildTestDependencies(provider: Provider = new FakeProvider()): AppDependencies {
+  const providerRegistry = new ProviderRegistry();
+  providerRegistry.register(provider);
+
   const planner = new Planner({
     intentAnalyzer: new CompositeIntentAnalyzer([new KeywordIntentAnalyzer()]),
     capabilityResolver: new StaticCapabilityResolver(),
   });
-  const router = new CapabilityMatchingRouter([provider]);
+  const router = new ScoringRouter(providerRegistry);
   const executor = new Executor(router);
   const executionStore = new InMemoryExecutionStore();
   const jobRepository = new InMemoryJobRepository();
@@ -72,6 +94,7 @@ export function buildTestDependencies(provider: Provider = new FakeProvider()): 
     planner,
     router,
     executor,
+    providerRegistry,
     ollamaProvider: provider,
   };
 }

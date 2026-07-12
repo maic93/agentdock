@@ -5,8 +5,10 @@ import {
   type Execution,
   type ExecutionError,
   ExecutionStatus,
+  type RoutingDiagnostics,
 } from "@agentdock/shared-types";
 import { NoProviderAvailableError, type Router } from "@agentdock/kernel-ai-router";
+import { PromptBuilder } from "@agentdock/kernel-prompt-builder";
 import { ProviderError } from "@agentdock/provider-abstraction";
 import { InvalidExecutionStateError } from "./errors.js";
 
@@ -22,11 +24,20 @@ import { InvalidExecutionStateError } from "./errors.js";
  * how a genuinely branching, multi-output graph should be summarized is
  * intentionally left for whenever a Planner actually produces one, rather
  * than guessed at now.
+ *
+ * As of milestone 007, each node's raw objective text is no longer sent to
+ * the provider directly — it's run through a {@link PromptBuilder} first,
+ * using the node's capability and the Execution's already-resolved intent
+ * to select a template. `promptBuilder` is a new, optional third
+ * constructor parameter (defaulting to a builder with the standard
+ * template set) specifically so every existing caller that only ever
+ * passed `(router)` or `(router, clock)` keeps working unchanged.
  */
 export class Executor {
   constructor(
     private readonly router: Router,
     private readonly clock?: Clock,
+    private readonly promptBuilder: PromptBuilder = new PromptBuilder(),
   ) {}
 
   async execute(execution: Execution): Promise<Execution> {
@@ -45,15 +56,40 @@ export class Executor {
     }
 
     const startedAt = Date.now();
+    let lastDiagnostics: RoutingDiagnostics | undefined;
     try {
       let output = "";
       let model = "";
       let providerId = "";
 
       for (const node of graph.nodes) {
-        const provider = await this.router.selectProvider({ capability: node.capability });
+        const { provider, diagnostics: routingDiagnostics } =
+          await this.router.selectProviderWithDiagnostics({ capability: node.capability });
+
+        if (!provider) {
+          lastDiagnostics = routingDiagnostics;
+          throw new NoProviderAvailableError(node.capability);
+        }
+
+        const builtPrompt = this.promptBuilder.build({
+          goal: executing.goal,
+          // Invariant: a Routing-status Execution always has an intent —
+          // set by the Planner during Analyzing, the stage before Routing
+          // is reachable at all.
+          intent: executing.intent!,
+          capability: node.capability,
+          execution: executing,
+          providerMetadata: provider.metadata,
+        });
+
+        lastDiagnostics = {
+          ...routingDiagnostics,
+          promptTemplateId: builtPrompt.templateId,
+          promptBuildDurationMs: builtPrompt.buildDurationMs,
+        };
+
         const providerResult = await provider.execute({
-          objective: node.objective,
+          objective: builtPrompt.text,
           capability: node.capability,
         });
         output = providerResult.output;
@@ -62,23 +98,28 @@ export class Executor {
       }
 
       const durationMs = Date.now() - startedAt;
-      const result = createExecutionResult(output, { provider: providerId, model, durationMs });
+      const result = createExecutionResult(output, {
+        provider: providerId,
+        model,
+        durationMs,
+        ...(lastDiagnostics ? { diagnostics: lastDiagnostics } : {}),
+      });
       return executing.complete(result, this.clock);
     } catch (cause) {
-      return executing.fail(toExecutionError(cause), this.clock);
+      return executing.fail(toExecutionError(cause, lastDiagnostics), this.clock);
     }
   }
 }
 
-function toExecutionError(cause: unknown): ExecutionError {
+function toExecutionError(cause: unknown, diagnostics?: RoutingDiagnostics): ExecutionError {
   if (cause instanceof ProviderError) {
-    return createExecutionError(cause.message, "PROVIDER_ERROR", cause);
+    return createExecutionError(cause.message, "PROVIDER_ERROR", cause, diagnostics);
   }
   if (cause instanceof NoProviderAvailableError) {
-    return createExecutionError(cause.message, "ROUTING_ERROR", cause);
+    return createExecutionError(cause.message, "ROUTING_ERROR", cause, diagnostics);
   }
   if (cause instanceof Error) {
-    return createExecutionError(cause.message, "EXECUTION_FAILED", cause);
+    return createExecutionError(cause.message, "EXECUTION_FAILED", cause, diagnostics);
   }
-  return createExecutionError("Unknown execution failure.", "EXECUTION_FAILED", cause);
+  return createExecutionError("Unknown execution failure.", "EXECUTION_FAILED", cause, diagnostics);
 }

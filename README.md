@@ -299,22 +299,97 @@ Planner and Executor, why `POST /execute` still works — is in
 [docs/architecture/005-job-domain.md](./docs/architecture/005-job-domain.md)
 (building on
 [004 — The End-to-End Execution Pipeline](./docs/architecture/004-execution-pipeline.md)).
+As of milestone 007, the Router selects a provider by **score** (not just
+health) and the Executor builds a real, composed prompt before calling the
+provider — see [Provider Routing & Prompts](#provider-routing--prompts)
+below.
+
+## Provider Routing & Prompts
+
+Providers are held in a `ProviderRegistry` (register/unregister at
+runtime) and described by structured `ProviderMetadata` — the Router never
+inspects a provider's id or name, only its metadata. `ScoringRouter`
+(the default) scores every capable, healthy candidate on
+`priority`/`latencyTier`/`costTier`, deterministically, with ties broken
+by priority then provider id.
+
+Before calling a provider, the Executor now builds a real prompt via
+`PromptBuilder`: a data-driven template (system/developer/user/
+output-format sections) plus whatever context/memory/tool instructions are
+available — composed into one finished prompt, never a raw goal string
+sent as-is. See
+[docs/architecture/006-provider-routing.md](./docs/architecture/006-provider-routing.md)
+for the full design, including why only one of the seven shipped templates
+is reachable today.
+
+```bash
+curl http://localhost:3000/providers
+```
+
+```json
+{
+  "providers": [
+    {
+      "metadata": {
+        "id": "ollama",
+        "displayName": "Ollama",
+        "providerType": "local",
+        "capabilities": ["text-generation"],
+        "priority": 100,
+        "costTier": "free",
+        "latencyTier": "medium"
+      },
+      "health": { "healthy": true }
+    }
+  ]
+}
+```
+
+```bash
+curl "http://localhost:3000/routing?capability=text-generation"
+```
+
+```json
+{
+  "capability": "text-generation",
+  "selectedProviderId": "ollama",
+  "scores": [
+    {
+      "providerId": "ollama",
+      "eligible": true,
+      "score": 105,
+      "breakdown": { "priority": 100, "latency": 2, "cost": 3 }
+    }
+  ],
+  "reason": "Highest-scoring eligible provider (score 105).",
+  "selectionDurationMs": 1
+}
+```
+
+`GET /providers/:id` and `GET /providers/health` are also available — see
+[docs/architecture/006-provider-routing.md](./docs/architecture/006-provider-routing.md)
+for the full endpoint list.
 
 ## Known Limitations
 
 - **One Execution per Job, always.** There is no multi-Execution planning
   yet — every Job creates exactly one Execution.
-- **One provider, one capability.** Only Ollama, only `text-generation`,
-  only conversational goals resolve to it. Anything else fails planning
-  with a 422.
+- **Still one real provider.** The registry and scoring router support
+  many; only Ollama is registered. Scoring weights are untested against a
+  genuine multi-provider choice.
+- **Six of seven prompt templates are unreachable in practice.** Only
+  conversational goals classify to a capability today.
 - **No Artifact model.** Referenced in the long-term architecture, not yet
   implemented.
 - **No streaming.** Both `POST /jobs` and `POST /execute` block until
   Ollama's full response is ready.
-- **No auth, no persistence across restarts, no plugin system yet.** Both
-  stores are in-memory; the Ollama provider is wired in by a composition
-  root, not discovered dynamically (see
-  [ADR 0004](./docs/adr/0004-apps-may-depend-on-plugins.md)).
+- **No auth, no persistence across restarts, no dynamic plugin loading.**
+  Both stores are in-memory; providers are registered by a composition
+  root, not discovered from a real plugin marketplace (see
+  [ADR 0004](./docs/adr/0004-apps-may-depend-on-plugins.md)) — though they
+  _are_ now held in a registry that supports runtime
+  register/unregister (see
+  [ADR 0006](./docs/adr/0006-provider-registry.md)).
 
 ## Repository layout
 
@@ -351,8 +426,10 @@ restated, from this README:
   — the `Execution` aggregate and its lifecycle.
 - [004 — The End-to-End Execution Pipeline](./docs/architecture/004-execution-pipeline.md)
   — connecting Execution to a real provider (Ollama).
-- [005 — The Job Domain](./docs/architecture/005-job-domain.md) — this
-  milestone.
+- [005 — The Job Domain](./docs/architecture/005-job-domain.md) — `Job`
+  above `Execution`.
+- [006 — Provider Registry, Scoring, and Prompt Composition](./docs/architecture/006-provider-routing.md)
+  — this milestone.
 
 ## Contributing
 
