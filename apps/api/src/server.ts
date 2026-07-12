@@ -11,10 +11,17 @@ import { handleExecute } from "./routes/execute.js";
 import { handleGetExecution } from "./routes/get-execution.js";
 import { handleHealth } from "./routes/health.js";
 import { handleCreateJob, handleGetJob, handleGetJobExecutions } from "./routes/jobs.js";
+import {
+  handleGetProvider,
+  handleListProviders,
+  handleProvidersHealth,
+} from "./routes/providers.js";
+import { handleGetRouting } from "./routes/routing.js";
 
 const EXECUTION_PATH_PATTERN = /^\/executions\/([^/]+)$/;
 const JOB_PATH_PATTERN = /^\/jobs\/([^/]+)$/;
 const JOB_EXECUTIONS_PATH_PATTERN = /^\/jobs\/([^/]+)\/executions$/;
+const PROVIDER_PATH_PATTERN = /^\/providers\/([^/]+)$/;
 
 /**
  * Builds the HTTP server. Uses `node:http` directly rather than a
@@ -100,6 +107,30 @@ async function dispatch(
 
   if (req.method === "GET" && url.pathname === "/health") {
     sendJson(res, await handleHealth(deps));
+    return;
+  }
+
+  // Most specific pattern first: /providers/health (a literal path) before
+  // /providers/:id (which would otherwise treat "health" as an id).
+  if (req.method === "GET" && url.pathname === "/providers/health") {
+    sendJson(res, await handleProvidersHealth(deps));
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/providers") {
+    sendJson(res, await handleListProviders(deps));
+    return;
+  }
+
+  const providerMatch = PROVIDER_PATH_PATTERN.exec(url.pathname);
+  if (req.method === "GET" && providerMatch) {
+    const rawId = decodeURIComponent(providerMatch[1] ?? "");
+    sendJson(res, await handleGetProvider(deps, rawId));
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/routing") {
+    sendJson(res, await handleGetRouting(deps, url.searchParams));
     return;
   }
 

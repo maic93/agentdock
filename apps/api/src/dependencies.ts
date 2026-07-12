@@ -2,6 +2,7 @@ import type { ExecutionStore, JobRepository } from "@agentdock/foundation-db";
 import type { Router } from "@agentdock/kernel-ai-router";
 import type { JobService } from "@agentdock/kernel-job-service";
 import type { Planner } from "@agentdock/kernel-planner";
+import type { ProviderRegistry } from "@agentdock/kernel-provider-registry";
 import type { Executor } from "@agentdock/kernel-workflow-engine";
 import type { Provider } from "@agentdock/provider-abstraction";
 
@@ -17,6 +18,10 @@ import type { Provider } from "@agentdock/provider-abstraction";
  * /executions/:id`, `GET /jobs/:id`, `GET /jobs/:id/executions` — need to
  * fetch already-persisted records without going through JobService, which
  * only knows how to create and run a Job, not look one up.
+ *
+ * `providerRegistry` was added in milestone 007 for the same reason: `GET
+ * /providers`, `GET /providers/:id`, and `GET /providers/health` read
+ * directly from it.
  */
 export interface AppDependencies {
   readonly executionStore: ExecutionStore;
@@ -25,10 +30,12 @@ export interface AppDependencies {
   readonly planner: Planner;
   readonly router: Router;
   readonly executor: Executor;
+  readonly providerRegistry: ProviderRegistry;
   /**
    * Kept as a direct reference (in addition to being registered with
-   * `router`) specifically so GET /health can report this provider's
-   * status by name, per this milestone's required health response shape.
+   * `providerRegistry`) specifically so GET /health can report this
+   * provider's status by name, per this milestone's required health
+   * response shape.
    */
   readonly ollamaProvider: Provider;
 }

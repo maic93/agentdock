@@ -48,3 +48,4 @@ export {
 } from "./job-status.js";
 export { summarizeJob, type JobSummary } from "./job-summary.js";
 export { Job, type JobProps } from "./job.js";
+export type { ProviderScore, RoutingDiagnostics } from "./routing-diagnostics.js";

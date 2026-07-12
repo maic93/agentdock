@@ -1,7 +1,7 @@
 {
   "name": "@agentdock/api",
   "version": "0.1.0",
-  "description": "AgentDock's HTTP API: POST /jobs, GET /jobs/:id, GET /jobs/:id/executions, GET /executions/:id, GET /health, and the deprecated POST /execute.",
+  "description": "AgentDock's HTTP API: POST /jobs, GET /jobs/:id, GET /jobs/:id/executions, GET /executions/:id, GET /providers, GET /providers/:id, GET /providers/health, GET /routing, GET /health, and the deprecated POST /execute.",
   "license": "MIT",
   "type": "module",
   "main": "./dist/main.js",
@@ -22,6 +22,8 @@
     "@agentdock/kernel-ai-router": "workspace:*",
     "@agentdock/kernel-job-service": "workspace:*",
     "@agentdock/kernel-planner": "workspace:*",
+    "@agentdock/kernel-prompt-builder": "workspace:*",
+    "@agentdock/kernel-provider-registry": "workspace:*",
     "@agentdock/kernel-workflow-engine": "workspace:*",
     "@agentdock/plugin-provider-ollama": "workspace:*",
     "@agentdock/provider-abstraction": "workspace:*",

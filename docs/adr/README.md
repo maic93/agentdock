@@ -38,3 +38,4 @@ internal implementation details) don't need one.
 | [0003](./0003-vitest-and-cross-package-type-resolution.md)  | Vitest as the test runner; cross-package types resolve through built output | Accepted |
 | [0004](./0004-apps-may-depend-on-plugins.md)                | Apps may depend on plugins directly, as a composition-root exception        | Accepted |
 | [0005](./0005-job-domain-and-kernel-foundation-boundary.md) | The Job domain: package placement and a kernel/foundation boundary fix      | Accepted |
+| [0006](./0006-provider-registry.md)                         | Provider Registry, scoring-based routing, and dynamic provider discovery    | Accepted |

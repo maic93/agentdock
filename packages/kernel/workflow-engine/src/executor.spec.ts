@@ -14,6 +14,7 @@ import {
   type ProviderExecuteResult,
   type ProviderHealth,
   type ProviderId,
+  type ProviderMetadata,
   ProviderUnavailableError,
 } from "@agentdock/provider-abstraction";
 import {
@@ -50,6 +51,23 @@ function routedExecution(): Execution {
 class StubProvider implements Provider {
   readonly id: ProviderId = createProviderId("stub");
   readonly capabilities = ["text-generation" as const];
+  readonly metadata: ProviderMetadata = {
+    id: this.id,
+    displayName: "Stub",
+    providerType: "local",
+    version: "0.0.0",
+    capabilities: this.capabilities,
+    supportsStreaming: false,
+    supportsVision: false,
+    supportsTools: false,
+    supportsJSON: false,
+    supportsFunctionCalling: false,
+    contextWindow: 4096,
+    maxOutputTokens: 1024,
+    priority: 100,
+    costTier: "free",
+    latencyTier: "medium",
+  };
 
   constructor(
     private readonly result: ProviderExecuteResult = { output: "Hi!", model: "stub-model" },
@@ -80,6 +98,22 @@ class StubRouter implements Router {
       throw this.provider;
     }
     return this.provider;
+  }
+
+  async selectProviderWithDiagnostics(request: RoutingRequest) {
+    const diagnostics = {
+      capability: request.capability,
+      scores: [],
+      reason: this.provider instanceof Error ? this.provider.message : "stub selection",
+      selectionDurationMs: 0,
+    };
+    if (this.provider instanceof Error) {
+      return { diagnostics };
+    }
+    return {
+      provider: this.provider,
+      diagnostics: { ...diagnostics, selectedProviderId: this.provider.id },
+    };
   }
 }
 

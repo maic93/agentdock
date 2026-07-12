@@ -7,9 +7,12 @@ package in the repository — hundreds of external plugins will depend on it,
 so breaking changes here are the most expensive kind this project can make.
 
 **Public API (implemented):** the `Provider` interface (`id`,
-`capabilities`, `checkHealth`, `listModels`, `execute`), `ProviderId`,
-`ProviderHealth`, `ProviderExecuteRequest`/`ProviderExecuteResult`, and the
-shared error vocabulary (`ProviderError`, `ProviderTimeoutError`,
+`capabilities`, `metadata`, `checkHealth`, `listModels`, `execute`),
+`ProviderId`, `ProviderHealth`, `ProviderMetadata` (added in milestone
+007 — see
+[docs/architecture/006-provider-routing.md](../../../docs/architecture/006-provider-routing.md)),
+`ProviderExecuteRequest`/`ProviderExecuteResult`, and the shared error
+vocabulary (`ProviderError`, `ProviderTimeoutError`,
 `ProviderUnavailableError`) every concrete provider throws.
 
 **May depend on:** `@agentdock/shared-types` only.

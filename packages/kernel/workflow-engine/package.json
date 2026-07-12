@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@agentdock/kernel-ai-router": "workspace:*",
+    "@agentdock/kernel-prompt-builder": "workspace:*",
     "@agentdock/provider-abstraction": "workspace:*",
     "@agentdock/shared-types": "workspace:*"
   },

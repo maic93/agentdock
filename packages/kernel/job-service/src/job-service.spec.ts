@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { InMemoryExecutionStore, InMemoryJobRepository } from "@agentdock/foundation-db";
 import { CapabilityMatchingRouter } from "@agentdock/kernel-ai-router";
+import { ProviderRegistry } from "@agentdock/kernel-provider-registry";
 import {
   CompositeIntentAnalyzer,
   KeywordIntentAnalyzer,
@@ -15,6 +16,7 @@ import {
   type ProviderExecuteResult,
   type ProviderHealth,
   type ProviderId,
+  type ProviderMetadata,
 } from "@agentdock/provider-abstraction";
 import { JobStatus } from "@agentdock/shared-types";
 import { JobService, type JobServiceDependencies } from "./job-service.js";
@@ -22,6 +24,23 @@ import { JobService, type JobServiceDependencies } from "./job-service.js";
 class StubProvider implements Provider {
   readonly id: ProviderId = createProviderId("stub");
   readonly capabilities = ["text-generation" as const];
+  readonly metadata: ProviderMetadata = {
+    id: this.id,
+    displayName: "Stub",
+    providerType: "local",
+    version: "0.0.0",
+    capabilities: this.capabilities,
+    supportsStreaming: false,
+    supportsVision: false,
+    supportsTools: false,
+    supportsJSON: false,
+    supportsFunctionCalling: false,
+    contextWindow: 4096,
+    maxOutputTokens: 1024,
+    priority: 100,
+    costTier: "free",
+    latencyTier: "medium",
+  };
 
   constructor(
     private readonly result: ProviderExecuteResult = { output: "Hi there!", model: "stub-model" },
@@ -46,7 +65,9 @@ function buildDependencies(provider: Provider = new StubProvider()): JobServiceD
     intentAnalyzer: new CompositeIntentAnalyzer([new KeywordIntentAnalyzer()]),
     capabilityResolver: new StaticCapabilityResolver(),
   });
-  const router = new CapabilityMatchingRouter([provider]);
+  const registry = new ProviderRegistry();
+  registry.register(provider);
+  const router = new CapabilityMatchingRouter(registry);
   const executor = new Executor(router);
 
   return {

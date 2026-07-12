@@ -203,4 +203,62 @@ describe("HTTP server (integration)", () => {
     const job = (await jobViaNewRoute.json()) as { executionIds: string[] };
     expect(job.executionIds).toEqual([executed.executionId]);
   });
+
+  it("GET /providers lists the registered provider with metadata and health", async () => {
+    const response = await fetch(`${baseUrl}/providers`);
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      providers: Array<{
+        metadata: { id: string; displayName: string };
+        health: { healthy: boolean };
+      }>;
+    };
+    expect(body.providers).toHaveLength(1);
+    expect(body.providers[0]?.metadata.id).toBe("fake-provider");
+    expect(body.providers[0]?.health.healthy).toBe(true);
+  });
+
+  it("GET /providers/:id returns one provider's metadata and health", async () => {
+    const response = await fetch(`${baseUrl}/providers/fake-provider`);
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { metadata: { displayName: string } };
+    expect(body.metadata.displayName).toBe("Fake Provider");
+  });
+
+  it("GET /providers/:id returns 404 for an unregistered id", async () => {
+    const response = await fetch(`${baseUrl}/providers/does-not-exist`);
+    expect(response.status).toBe(404);
+  });
+
+  it("GET /providers/health reports every provider's health", async () => {
+    const response = await fetch(`${baseUrl}/providers/health`);
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { providers: Array<{ id: string }> };
+    expect(body.providers.map((p) => p.id)).toEqual(["fake-provider"]);
+  });
+
+  it("GET /routing returns live diagnostics for the default capability", async () => {
+    const response = await fetch(`${baseUrl}/routing`);
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { capability: string; selectedProviderId: string };
+    expect(body.capability).toBe("text-generation");
+    expect(body.selectedProviderId).toBe("fake-provider");
+  });
+
+  it("a completed Job's Execution carries routing diagnostics, including the prompt template used", async () => {
+    const createResponse = await fetch(`${baseUrl}/jobs`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ goal: "Hello" }),
+    });
+    const created = (await createResponse.json()) as { executionId: string };
+
+    const executionResponse = await fetch(`${baseUrl}/executions/${created.executionId}`);
+    const execution = (await executionResponse.json()) as {
+      result: { diagnostics?: { selectedProviderId: string; promptTemplateId: string } };
+    };
+
+    expect(execution.result.diagnostics?.selectedProviderId).toBe("fake-provider");
+    expect(execution.result.diagnostics?.promptTemplateId).toBe("conversation");
+  });
 });

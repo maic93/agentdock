@@ -21,6 +21,9 @@ them:
 5. **[005 — The Job Domain](./005-job-domain.md)** — `Job` as an
    orchestration layer above `Execution`, Execution ownership, and the new
    `/jobs` API.
+6. **[006 — Provider Registry, Scoring, and Prompt Composition](./006-provider-routing.md)**
+   — dynamic provider discovery, metadata-driven scoring, and a real
+   Prompt Builder replacing raw goal text sent to providers.
 
 ## Repository foundation
 

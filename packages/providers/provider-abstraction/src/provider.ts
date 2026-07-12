@@ -1,6 +1,7 @@
 import type { Capability } from "@agentdock/shared-types";
 import type { ProviderHealth } from "./provider-health.js";
 import type { ProviderId } from "./provider-id.js";
+import type { ProviderMetadata } from "./provider-metadata.js";
 
 /** A request to a {@link Provider} to satisfy one capability for one objective. */
 export interface ProviderExecuteRequest {
@@ -30,6 +31,14 @@ export interface ProviderExecuteResult {
 export interface Provider {
   readonly id: ProviderId;
   readonly capabilities: readonly Capability[];
+  /**
+   * Structured facts about this provider (added in milestone 007 — see
+   * docs/architecture/006-provider-routing.md). The AI Router's scoring
+   * strategy reads this instead of ever branching on `id`, which is what
+   * makes routing genuinely provider-agnostic rather than provider-agnostic
+   * in name only.
+   */
+  readonly metadata: ProviderMetadata;
 
   /** Whether the provider is currently reachable and usable. */
   checkHealth(): Promise<ProviderHealth>;

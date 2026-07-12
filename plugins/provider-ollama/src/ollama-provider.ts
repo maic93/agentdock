@@ -5,6 +5,7 @@ import {
   type ProviderExecuteResult,
   type ProviderHealth,
   type ProviderId,
+  type ProviderMetadata,
   ProviderTimeoutError,
   ProviderUnavailableError,
 } from "@agentdock/provider-abstraction";
@@ -38,10 +39,48 @@ export class OllamaProvider implements Provider {
   readonly id: ProviderId = createProviderId("ollama");
   readonly capabilities: readonly Capability[] = ["text-generation"];
 
+  /**
+   * Every value here is honest about what it actually reflects:
+   * - `supportsStreaming`/`supportsVision`/`supportsTools`/`supportsJSON`/
+   *   `supportsFunctionCalling` are all `false` because this *adapter*
+   *   doesn't implement any of them yet (Ollama itself supports several —
+   *   e.g. `stream: true`, `format: "json"` — this provider just never
+   *   sets those request options). These describe AgentDock's current
+   *   integration, not Ollama's full feature set.
+   * - `contextWindow`/`maxOutputTokens` are conservative, commonly-safe
+   *   defaults, NOT introspected from whichever model `OLLAMA_MODEL`
+   *   actually names — Ollama's `/api/show` endpoint could provide the
+   *   real per-model values, but calling it isn't implemented in this
+   *   milestone. Treat these two fields as approximate until that exists.
+   * - `latencyTier` is a reasonable default for a local model, not a
+   *   measured benchmark.
+   * - `costTier: "free"` and `providerType: "local"` are genuinely true
+   *   for a local Ollama instance.
+   */
+  readonly metadata: ProviderMetadata;
+
   constructor(
     private readonly config: OllamaProviderConfig,
     private readonly fetchImpl: FetchLike = fetch,
-  ) {}
+  ) {
+    this.metadata = {
+      id: this.id,
+      displayName: "Ollama",
+      providerType: "local",
+      version: "0.1.0",
+      capabilities: this.capabilities,
+      supportsStreaming: false,
+      supportsVision: false,
+      supportsTools: false,
+      supportsJSON: false,
+      supportsFunctionCalling: false,
+      contextWindow: 4096,
+      maxOutputTokens: 2048,
+      priority: 100,
+      costTier: "free",
+      latencyTier: "medium",
+    };
+  }
 
   async checkHealth(): Promise<ProviderHealth> {
     try {
