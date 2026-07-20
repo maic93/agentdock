@@ -2,48 +2,36 @@
 # why. Kept deliberately simple: weekly batched PRs, grouped by ecosystem, to
 # avoid drowning maintainers in individual bump PRs at scale.
 version: 2
+
 updates:
+  # Security fixes only for npm packages
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
-    groups:
-      typescript-tooling:
-        patterns:
-          - "typescript"
-          - "@typescript-eslint/*"
-          - "eslint*"
-          - "prettier"
-      nx:
-        patterns:
-          - "nx"
-          - "@nx/*"
-      testing:
-        patterns:
-          - "vitest"
-          - "@vitest/*"
+      interval: "monthly"
+    open-pull-requests-limit: 3
     commit-message:
       prefix: "chore"
       include: "scope"
     labels:
       - "dependencies"
 
+  # Security fixes only for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     commit-message:
       prefix: "ci"
     labels:
       - "dependencies"
       - "ci"
 
+  # Security fixes only for Docker
   - package-ecosystem: "docker"
     directory: "/infra/docker"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     commit-message:
       prefix: "chore"
     labels:
