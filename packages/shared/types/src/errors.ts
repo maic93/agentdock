@@ -55,3 +55,17 @@ export class InvalidJobTransitionError extends Error {
     this.name = "InvalidJobTransitionError";
   }
 }
+
+/**
+ * Thrown when constructing a {@link WorkflowPlan} whose nodes/edges violate
+ * a structural invariant: a duplicate node id, an edge referencing an
+ * unknown node, a dependency cycle, or a node unreachable from every root
+ * (a node with no incoming edges). Mirrors {@link InvalidExecutionGraphError}'s
+ * role for {@link ExecutionGraph}, one level up the domain.
+ */
+export class InvalidWorkflowPlanError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidWorkflowPlanError";
+  }
+}

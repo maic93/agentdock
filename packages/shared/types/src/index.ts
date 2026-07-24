@@ -4,6 +4,7 @@ export {
   InvalidExecutionTransitionError,
   InvalidGoalError,
   InvalidJobTransitionError,
+  InvalidWorkflowPlanError,
 } from "./errors.js";
 export {
   createExecutionNodeId,
@@ -49,3 +50,13 @@ export {
 export { summarizeJob, type JobSummary } from "./job-summary.js";
 export { Job, type JobProps } from "./job.js";
 export type { ProviderScore, RoutingDiagnostics } from "./routing-diagnostics.js";
+export { createWorkflowId, type WorkflowId } from "./workflow-id.js";
+export type { WorkflowMetadata } from "./workflow-metadata.js";
+export {
+  createWorkflowNodeId,
+  type WorkflowEdge,
+  type WorkflowNode,
+  type WorkflowNodeId,
+  WorkflowNodeStatus,
+} from "./workflow-node.js";
+export { WorkflowPlan, type WorkflowPlanProps } from "./workflow-plan.js";

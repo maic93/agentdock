@@ -5,6 +5,7 @@ import { createGoal } from "./goal.js";
 import { InvalidJobTransitionError } from "./errors.js";
 import { Job } from "./job.js";
 import { JobStatus } from "./job-status.js";
+import { createWorkflowId } from "./workflow-id.js";
 
 const FIXED_TIME_1 = new Date("2026-01-01T00:00:00.000Z");
 const FIXED_TIME_2 = new Date("2026-01-01T00:00:01.000Z");
@@ -148,5 +149,55 @@ describe("Job.fromProps / toProps round-trip", () => {
     expect(rehydrated.status).toBe(original.status);
     expect(rehydrated.priority).toBe(original.priority);
     expect(rehydrated.goal).toEqual(original.goal);
+  });
+});
+
+describe("Job.withWorkflow", () => {
+  it("attaches a workflowId without changing status", () => {
+    const workflowId = createWorkflowId();
+    const job = Job.create(createGoal("Hello")).startPlanning().withWorkflow(workflowId);
+    expect(job.workflowId).toBe(workflowId);
+    expect(job.status).toBe(JobStatus.Planning);
+  });
+
+  it("has no workflowId until withWorkflow is called", () => {
+    const job = Job.create(createGoal("Hello"));
+    expect(job.workflowId).toBeUndefined();
+  });
+});
+
+describe("Job.startExecuting / addExecution", () => {
+  it("startExecuting transitions Planning -> Executing without recording an execution", () => {
+    const job = Job.create(createGoal("Hello")).startPlanning().startExecuting();
+    expect(job.status).toBe(JobStatus.Executing);
+    expect(job.executionIds).toEqual([]);
+  });
+
+  it("addExecution appends an execution id while already Executing", () => {
+    const first = createExecutionId();
+    const second = createExecutionId();
+    const job = Job.create(createGoal("Hello"))
+      .startPlanning()
+      .startExecuting()
+      .addExecution(first)
+      .addExecution(second);
+    expect(job.executionIds).toEqual([first, second]);
+    expect(job.status).toBe(JobStatus.Executing);
+  });
+
+  it("addExecution throws if the Job isn't already Executing", () => {
+    const job = Job.create(createGoal("Hello")).startPlanning();
+    expect(() => job.addExecution(createExecutionId())).toThrow(InvalidJobTransitionError);
+  });
+
+  it("addExecution can be followed by complete, mirroring the full multi-node flow", () => {
+    const job = Job.create(createGoal("Hello"))
+      .startPlanning()
+      .startExecuting()
+      .addExecution(createExecutionId())
+      .addExecution(createExecutionId())
+      .complete({ summary: "done" });
+    expect(job.status).toBe(JobStatus.Completed);
+    expect(job.executionIds).toHaveLength(2);
   });
 });

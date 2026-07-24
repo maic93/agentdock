@@ -25,6 +25,7 @@
     "@agentdock/kernel-prompt-builder": "workspace:*",
     "@agentdock/kernel-provider-registry": "workspace:*",
     "@agentdock/kernel-workflow-engine": "workspace:*",
+    "@agentdock/kernel-workflow-planner": "workspace:*",
     "@agentdock/plugin-provider-ollama": "workspace:*",
     "@agentdock/provider-abstraction": "workspace:*",
     "@agentdock/shared-types": "workspace:*"

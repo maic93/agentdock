@@ -31,11 +31,12 @@ internal implementation details) don't need one.
 
 ## Index
 
-| ADR                                                         | Title                                                                       | Status   |
-| ----------------------------------------------------------- | --------------------------------------------------------------------------- | -------- |
-| [0001](./0001-record-architecture-decisions.md)             | Record architecture decisions as ADRs                                       | Accepted |
-| [0002](./0002-node-version-policy.md)                       | Standardize on Node.js 24 (Active LTS), not Node.js 20                      | Accepted |
-| [0003](./0003-vitest-and-cross-package-type-resolution.md)  | Vitest as the test runner; cross-package types resolve through built output | Accepted |
-| [0004](./0004-apps-may-depend-on-plugins.md)                | Apps may depend on plugins directly, as a composition-root exception        | Accepted |
-| [0005](./0005-job-domain-and-kernel-foundation-boundary.md) | The Job domain: package placement and a kernel/foundation boundary fix      | Accepted |
-| [0006](./0006-provider-registry.md)                         | Provider Registry, scoring-based routing, and dynamic provider discovery    | Accepted |
+| ADR                                                         | Title                                                                               | Status   |
+| ----------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------- |
+| [0001](./0001-record-architecture-decisions.md)             | Record architecture decisions as ADRs                                               | Accepted |
+| [0002](./0002-node-version-policy.md)                       | Standardize on Node.js 24 (Active LTS), not Node.js 20                              | Accepted |
+| [0003](./0003-vitest-and-cross-package-type-resolution.md)  | Vitest as the test runner; cross-package types resolve through built output         | Accepted |
+| [0004](./0004-apps-may-depend-on-plugins.md)                | Apps may depend on plugins directly, as a composition-root exception                | Accepted |
+| [0005](./0005-job-domain-and-kernel-foundation-boundary.md) | The Job domain: package placement and a kernel/foundation boundary fix              | Accepted |
+| [0006](./0006-provider-registry.md)                         | Provider Registry, scoring-based routing, and dynamic provider discovery            | Accepted |
+| [0007](./0007-workflow-planning.md)                         | Workflow Planning: DAG execution, immutable plans, and a third in-memory repository | Accepted |

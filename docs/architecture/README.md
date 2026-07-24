@@ -24,6 +24,9 @@ them:
 6. **[006 — Provider Registry, Scoring, and Prompt Composition](./006-provider-routing.md)**
    — dynamic provider discovery, metadata-driven scoring, and a real
    Prompt Builder replacing raw goal text sent to providers.
+7. **[007 — Workflow Planning](./007-workflow-planning.md)** — DAG-based
+   multi-Execution orchestration, immutable WorkflowPlans, iterative
+   scheduling, and failure propagation.
 
 ## Repository foundation
 
