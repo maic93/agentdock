@@ -26,12 +26,15 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@agentdock/foundation-db": "workspace:*",
     "@agentdock/kernel-ai-router": "workspace:*",
+    "@agentdock/kernel-planner": "workspace:*",
     "@agentdock/kernel-prompt-builder": "workspace:*",
     "@agentdock/provider-abstraction": "workspace:*",
     "@agentdock/shared-types": "workspace:*"
   },
   "devDependencies": {
+    "@agentdock/kernel-provider-registry": "workspace:*",
     "typescript": "5.6.3",
     "vitest": "4.1.9"
   }

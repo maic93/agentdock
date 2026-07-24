@@ -1,16 +1,8 @@
-import type { Execution, Job } from "@agentdock/shared-types";
+import type { Execution, Job, WorkflowPlan } from "@agentdock/shared-types";
 
 /**
- * Converts a domain {@link Execution} into a plain, JSON-safe object for
- * an API response. This is deliberately an application-layer concern, not
- * something Execution itself knows how to do — the domain model
- * (packages/shared/types) has no reason to know what an HTTP response
- * looks like.
- *
- * `error.cause` is intentionally omitted: it may be an arbitrary caught
- * value (including a nested Error whose own fields don't serialize
- * meaningfully via JSON.stringify), and exposing it doesn't help an API
- * consumer beyond what `error.message` and `error.code` already convey.
+ * Converts a domain Execution into a plain, JSON-safe object for an API
+ * response. error.cause is intentionally omitted.
  */
 export function serializeExecution(execution: Execution): Record<string, unknown> {
   return {
@@ -32,11 +24,7 @@ export function serializeExecution(execution: Execution): Record<string, unknown
   };
 }
 
-/**
- * Converts a domain {@link Job} into a plain, JSON-safe object for an API
- * response, mirroring {@link serializeExecution}'s shape and reasoning
- * exactly (same `error.cause` omission, same ISO-string timestamps).
- */
+/** Converts a domain Job into a plain, JSON-safe object for an API response. */
 export function serializeJob(job: Job): Record<string, unknown> {
   return {
     id: job.id,
@@ -44,11 +32,39 @@ export function serializeJob(job: Job): Record<string, unknown> {
     status: job.status,
     priority: job.priority,
     executionIds: job.executionIds,
+    workflowId: job.workflowId,
     result: job.result,
     error: job.error ? { message: job.error.message, code: job.error.code } : undefined,
     metadata: {
       createdAt: job.metadata.createdAt.toISOString(),
       updatedAt: job.metadata.updatedAt.toISOString(),
+    },
+  };
+}
+
+/** Converts a domain WorkflowPlan into a plain, JSON-safe object for GET /workflows/:id. */
+export function serializeWorkflow(plan: WorkflowPlan): Record<string, unknown> {
+  return {
+    id: plan.workflowId,
+    jobId: plan.jobId,
+    rootExecutionId: plan.rootExecutionId,
+    nodes: plan.nodes,
+    edges: plan.edges,
+    metadata: {
+      createdAt: plan.metadata.createdAt.toISOString(),
+      updatedAt: plan.metadata.updatedAt.toISOString(),
+    },
+  };
+}
+
+/** Converts a WorkflowPlan into the graph-focused shape GET /workflows/:id/graph returns. */
+export function serializeWorkflowGraph(plan: WorkflowPlan): Record<string, unknown> {
+  return {
+    nodes: plan.nodes,
+    edges: plan.edges,
+    metadata: {
+      createdAt: plan.metadata.createdAt.toISOString(),
+      updatedAt: plan.metadata.updatedAt.toISOString(),
     },
   };
 }

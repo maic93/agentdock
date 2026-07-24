@@ -1,5 +1,9 @@
 import type { AppConfig } from "@agentdock/foundation-config";
-import { InMemoryExecutionStore, InMemoryJobRepository } from "@agentdock/foundation-db";
+import {
+  InMemoryExecutionStore,
+  InMemoryJobRepository,
+  InMemoryWorkflowRepository,
+} from "@agentdock/foundation-db";
 import { ScoringRouter } from "@agentdock/kernel-ai-router";
 import { JobService } from "@agentdock/kernel-job-service";
 import {
@@ -10,24 +14,22 @@ import {
 } from "@agentdock/kernel-planner";
 import { PromptBuilder } from "@agentdock/kernel-prompt-builder";
 import { ProviderRegistry } from "@agentdock/kernel-provider-registry";
-import { Executor } from "@agentdock/kernel-workflow-engine";
+import { Executor, WorkflowEngine } from "@agentdock/kernel-workflow-engine";
+import { WorkflowPlanner } from "@agentdock/kernel-workflow-planner";
 import { OllamaProvider } from "@agentdock/plugin-provider-ollama";
 import type { AppDependencies } from "./dependencies.js";
 
 /**
  * Builds every collaborator the API needs from validated configuration.
  * This is the application's composition root — the one place, per
- * ADR 0004, allowed to import a concrete plugin (`OllamaProvider`)
+ * ADR 0004, allowed to import a concrete plugin (OllamaProvider)
  * directly, since AgentDock has no dynamic Plugin System yet. Everything
  * downstream of this function (the Router, the Executor, the route
- * handlers) only ever sees the `Provider` interface.
+ * handlers) only ever sees the Provider interface.
  *
- * As of milestone 007, providers are registered into a
- * {@link ProviderRegistry} rather than handed to the Router as a fixed
- * array, and the Router is {@link ScoringRouter} rather than
- * `CapabilityMatchingRouter` — see docs/adr/0006-provider-registry.md for
- * why the scoring strategy is now the default while the simpler one is
- * kept, not removed.
+ * As of milestone 008, JobService is wired to a WorkflowPlanner and
+ * WorkflowEngine (see docs/architecture/007-workflow-planning.md)
+ * instead of directly to a Planner/Executor pair.
  */
 export function buildDependencies(config: AppConfig): AppDependencies {
   const ollamaProvider = new OllamaProvider({
@@ -39,22 +41,32 @@ export function buildDependencies(config: AppConfig): AppDependencies {
   const providerRegistry = new ProviderRegistry();
   providerRegistry.register(ollamaProvider);
 
-  const planner = new Planner({
-    intentAnalyzer: new CompositeIntentAnalyzer([new KeywordIntentAnalyzer()]),
-    capabilityResolver: new StaticCapabilityResolver(),
-  });
+  const intentAnalyzer = new CompositeIntentAnalyzer([new KeywordIntentAnalyzer()]);
+  const capabilityResolver = new StaticCapabilityResolver();
+  const planner = new Planner({ intentAnalyzer, capabilityResolver });
+  const workflowPlanner = new WorkflowPlanner({ intentAnalyzer, capabilityResolver });
 
   const router = new ScoringRouter(providerRegistry);
   const promptBuilder = new PromptBuilder();
   const executor = new Executor(router, undefined, promptBuilder);
+
   const executionStore = new InMemoryExecutionStore();
   const jobRepository = new InMemoryJobRepository();
+  const workflowRepository = new InMemoryWorkflowRepository();
+  const workflowEngine = new WorkflowEngine({ planner, executor, executionStore });
 
-  const jobService = new JobService({ jobRepository, executionStore, planner, executor });
+  const jobService = new JobService({
+    jobRepository,
+    workflowRepository,
+    executionStore,
+    workflowPlanner,
+    workflowEngine,
+  });
 
   return {
     executionStore,
     jobRepository,
+    workflowRepository,
     jobService,
     planner,
     router,

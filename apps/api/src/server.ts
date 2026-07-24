@@ -17,11 +17,18 @@ import {
   handleProvidersHealth,
 } from "./routes/providers.js";
 import { handleGetRouting } from "./routes/routing.js";
+import {
+  handleCreateWorkflow,
+  handleGetWorkflow,
+  handleGetWorkflowGraph,
+} from "./routes/workflows.js";
 
 const EXECUTION_PATH_PATTERN = /^\/executions\/([^/]+)$/;
 const JOB_PATH_PATTERN = /^\/jobs\/([^/]+)$/;
 const JOB_EXECUTIONS_PATH_PATTERN = /^\/jobs\/([^/]+)\/executions$/;
 const PROVIDER_PATH_PATTERN = /^\/providers\/([^/]+)$/;
+const WORKFLOW_GRAPH_PATH_PATTERN = /^\/workflows\/([^/]+)\/graph$/;
+const WORKFLOW_PATH_PATTERN = /^\/workflows\/([^/]+)$/;
 
 /**
  * Builds the HTTP server. Uses `node:http` directly rather than a
@@ -81,6 +88,35 @@ async function dispatch(
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/workflows") {
+    let body: unknown;
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      sendJson(res, {
+        status: statusCodeForCategory("validation"),
+        body: errorBody("validation", "Request body must be valid JSON."),
+      });
+      return;
+    }
+    sendJson(res, await handleCreateWorkflow(deps, body));
+    return;
+  }
+
+  // Most specific pattern first: /workflows/:id/graph before /workflows/:id.
+  const workflowGraphMatch = WORKFLOW_GRAPH_PATH_PATTERN.exec(url.pathname);
+  if (req.method === "GET" && workflowGraphMatch) {
+    const rawId = decodeURIComponent(workflowGraphMatch[1] ?? "");
+    sendJson(res, await handleGetWorkflowGraph(deps, rawId));
+    return;
+  }
+
+  const workflowMatch = WORKFLOW_PATH_PATTERN.exec(url.pathname);
+  if (req.method === "GET" && workflowMatch) {
+    const rawId = decodeURIComponent(workflowMatch[1] ?? "");
+    sendJson(res, await handleGetWorkflow(deps, rawId));
+    return;
+  }
   // Most specific pattern first: /jobs/:id/executions before /jobs/:id,
   // since the latter's regex would otherwise never get a chance to not
   // match the former (both start with /jobs/).

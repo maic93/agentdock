@@ -1,4 +1,8 @@
-import { InMemoryExecutionStore, InMemoryJobRepository } from "@agentdock/foundation-db";
+import {
+  InMemoryExecutionStore,
+  InMemoryJobRepository,
+  InMemoryWorkflowRepository,
+} from "@agentdock/foundation-db";
 import { ScoringRouter } from "@agentdock/kernel-ai-router";
 import { JobService } from "@agentdock/kernel-job-service";
 import {
@@ -8,7 +12,8 @@ import {
   StaticCapabilityResolver,
 } from "@agentdock/kernel-planner";
 import { ProviderRegistry } from "@agentdock/kernel-provider-registry";
-import { Executor } from "@agentdock/kernel-workflow-engine";
+import { Executor, WorkflowEngine } from "@agentdock/kernel-workflow-engine";
+import { WorkflowPlanner } from "@agentdock/kernel-workflow-planner";
 import {
   createProviderId,
   type Provider,
@@ -21,17 +26,6 @@ import {
 import type { Capability } from "@agentdock/shared-types";
 import type { AppDependencies } from "./dependencies.js";
 
-/**
- * A fake provider for tests: no network, deterministic output, and
- * configurable health/failure behavior. This is the "mock Ollama" referred
- * to by this milestone's testing requirement — the real `OllamaProvider`
- * is tested on its own (see plugins/provider-ollama) with a fake `fetch`,
- * so nothing here needs to re-verify Ollama's HTTP contract.
- *
- * NOTE: this file is excluded from the package's build (see tsconfig.json)
- * — it exists only to support tests, and shipping it in `dist` would be
- * dead weight in the published package.
- */
 export class FakeProvider implements Provider {
   readonly id: ProviderId = createProviderId("fake-provider");
   readonly capabilities: readonly Capability[] = ["text-generation"];
@@ -72,24 +66,35 @@ export class FakeProvider implements Provider {
   }
 }
 
-/** Builds a full AppDependencies graph backed by a {@link FakeProvider} instead of a real Ollama instance. */
 export function buildTestDependencies(provider: Provider = new FakeProvider()): AppDependencies {
   const providerRegistry = new ProviderRegistry();
   providerRegistry.register(provider);
 
-  const planner = new Planner({
-    intentAnalyzer: new CompositeIntentAnalyzer([new KeywordIntentAnalyzer()]),
-    capabilityResolver: new StaticCapabilityResolver(),
-  });
+  const intentAnalyzer = new CompositeIntentAnalyzer([new KeywordIntentAnalyzer()]);
+  const capabilityResolver = new StaticCapabilityResolver();
+  const planner = new Planner({ intentAnalyzer, capabilityResolver });
+  const workflowPlanner = new WorkflowPlanner({ intentAnalyzer, capabilityResolver });
+
   const router = new ScoringRouter(providerRegistry);
   const executor = new Executor(router);
+
   const executionStore = new InMemoryExecutionStore();
   const jobRepository = new InMemoryJobRepository();
-  const jobService = new JobService({ jobRepository, executionStore, planner, executor });
+  const workflowRepository = new InMemoryWorkflowRepository();
+  const workflowEngine = new WorkflowEngine({ planner, executor, executionStore });
+
+  const jobService = new JobService({
+    jobRepository,
+    workflowRepository,
+    executionStore,
+    workflowPlanner,
+    workflowEngine,
+  });
 
   return {
     executionStore,
     jobRepository,
+    workflowRepository,
     jobService,
     planner,
     router,

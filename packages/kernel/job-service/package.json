@@ -27,12 +27,13 @@
   },
   "dependencies": {
     "@agentdock/foundation-db": "workspace:*",
-    "@agentdock/kernel-planner": "workspace:*",
     "@agentdock/kernel-workflow-engine": "workspace:*",
+    "@agentdock/kernel-workflow-planner": "workspace:*",
     "@agentdock/shared-types": "workspace:*"
   },
   "devDependencies": {
     "@agentdock/kernel-ai-router": "workspace:*",
+    "@agentdock/kernel-planner": "workspace:*",
     "@agentdock/kernel-provider-registry": "workspace:*",
     "@agentdock/provider-abstraction": "workspace:*",
     "typescript": "5.6.3",
