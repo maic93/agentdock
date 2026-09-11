@@ -36,6 +36,6 @@
   "devDependencies": {
     "@agentdock/kernel-provider-registry": "workspace:*",
     "typescript": "5.6.3",
-    "vitest": "4.1.9"
+    "vitest": "4.1.11"
   }
 }
